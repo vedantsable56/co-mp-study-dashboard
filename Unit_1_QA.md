@@ -361,7 +361,9 @@ Carries are calculated directly from C0 and inputs:
 
 | Feature | Address Bus | Data Bus | Control Bus |
 | :--- | :--- | :--- | :--- |
-| **Direction** | One-way only (from CPU to Memory or I/O). | Two-way (flows to and from the CPU). | Two-way (signals flow to and from components). |
-| **What it Carries** | Target physical address location numbers. | Actual data values and instruction codes. | Timing, control commands, and status signals. |
-| **Width Meaning** | Size determines maximum memory capacity (2^n). | Size determines how many bits transfer at once. | Size depends on the CPU control lines design. |
-| **8086 Example** | 20 lines (can address up to 1 MB). | 16 lines (transfers 2 bytes in one cycle). | Control pins like MEMR̅, MEMW̅, READY, RESET. |
+| **Direction** | One-way only (from CPU). | Two-way. | Two-way. |
+| **Carries** | Physical memory/IO address. | Data values and code bytes. | Control commands and clock. |
+| **Width Meaning** | Determines max RAM capacity. | Determines bits sent per cycle. | Determines number of commands. |
+| **Driven By** | CPU or DMA controller. | CPU, Memory, or I/O. | CPU, Memory, or I/O. |
+| **Purpose** | Selects target device/RAM. | Transfers the actual values. | Coordinates bus timing/tasks. |
+| **8086 Example** | 20 lines (accesses 1 MB). | 16 lines (sends 2 bytes). | Signals like MEMR̅, MEMW̅, READY. |
