@@ -4,8 +4,15 @@
 
 ## Q11. Draw the pin diagram of 8086 and explain pins ALE, WR̅, DEN̅, and DT/R̅ (6 Marks)
 
-*   **8086**: A 16-bit microprocessor with 20 address lines (1 MB memory space) and 16 data lines. It is housed in a 40-pin Dual Inline Package (DIP) IC.
-*   **Multiplexing**: The lower 16 address lines (A0 - A15) are multiplexed with data lines (D0 - D15) to form the AD0 - AD15 bus. This multiplexing reduces the physical pin count of the chip.
+*   **8086**:
+    *   16-bit microprocessor.
+    *   Has 20 address lines (1 MB memory).
+    *   Has 16 data lines.
+    *   Housed in a 40-pin Dual Inline Package (DIP) IC.
+*   **Line Sharing**:
+    *   Lower 16 address lines (A0 - A15) share pins with data lines (D0 - D15).
+    *   Form the combined AD0 - AD15 bus.
+    *   This reduces the physical pin count of the chip.
 
 ---
 
@@ -31,8 +38,7 @@
     AD0      [16] ──┤            ├──  [24] INTA̅ (QS1)
     NMI      [17] ──┤            ├──  [23] TEST̅
     INTR     [18] ──┤            ├──  [22] READY
-    CLK      [19] ──┤            ├──  [21] RESET
-    GND      [20] ──┤            └──────  
+    GND      [20] ──┤            └──────  [21] RESET
                     └────────────┘
 ```
 
@@ -42,47 +48,59 @@
 
 1.  **ALE (Address Latch Enable - Pin 25)**:
     *   *Type*: Output, Active HIGH.
-    *   *Role in Demultiplexing*: ALE is used to demultiplex (separate) the address/data bus. During state T1 of a bus cycle, the CPU places the address on AD0-AD15 and pulses ALE HIGH. This pulse commands an external latch chip (like 74LS373) to lock and store the address bits. In states T2, T3, and T4, ALE is LOW, and the AD0-AD15 pins act strictly as data lines.
+    *   *Role*: Used to separate address and data.
+    *   *Action*: During state T1 of a bus cycle, ALE goes HIGH.
+    *   *Action*: Signals external latch (74LS373) to save the address bits.
+    *   *Action*: During T2, T3, T4, ALE is LOW, and pins act as data lines.
 2.  **WR̅ (Write - Pin 29)**:
     *   *Type*: Output, Active LOW.
-    *   *Function*: Signals that the CPU is performing a memory or I/O write operation. When WR̅ goes LOW, it tells the external memory or I/O device to read the data currently placed on the data bus.
+    *   *Function*: Signals memory or I/O write operations.
+    *   *Action*: When LOW, tells external device to store data from the bus.
 3.  **DEN̅ (Data Enable - Pin 26)**:
     *   *Type*: Output, Active LOW.
-    *   *Function*: Turns on the data bus transceivers (74LS245 buffer chips) that isolate the CPU from external data bus loading. It goes LOW (active) during T2, T3, and T4 to connect the CPU to the data lines.
+    *   *Function*: Turns on data bus transceivers (74LS245 buffer chips).
+    *   *Action*: Goes LOW during T2, T3, T4 to link CPU to data lines.
 4.  **DT/R̅ (Data Transmit / Receive - Pin 27)**:
     *   *Type*: Output, Direction control.
-    *   *Function*: Controls the direction of data flow through the transceivers. When HIGH, the CPU is Transmitting (writing). When LOW, the CPU is Receiving (reading).
+    *   *Function*: Sets direction of data flow through transceivers.
+    *   *Action*: HIGH = CPU is writing (transmitting).
+    *   *Action*: LOW = CPU is reading (receiving).
 
 ---
 ---
 
 ## Q12. Explain architecture of 8086 with BIU, EU, ALU, Instruction Queue, Registers, and Buses (7 Marks)
 
-*   **Pipelining Architecture**: The 8086 architecture is divided into two independent functional units: the **Bus Interface Unit (BIU)** and the **Execution Unit (EU)**. This allows the CPU to fetch new instructions and execute current ones in parallel (pipelining), significantly increasing processing speed.
+*   **Division**:
+    *   Divided into two independent blocks: BIU and EU.
+    *   Enables parallel fetch and execute (pipelining).
+    *   Increases execution speed.
 
 ---
 
 ### 1. Bus Interface Unit (BIU) (Write in Exam):
 
-*   **Role**: Handles all data transfers, memory accesses, and instruction fetching on the external system bus.
+*   **Role**: Handles all transfers and instruction fetching.
 *   **Components**:
-    *   **Segment Registers**: Four 16-bit registers: **CS** (Code Segment), **DS** (Data Segment), **SS** (Stack Segment), and **ES** (Extra Segment). They point to the base addresses of 64KB blocks in the memory.
-    *   **Instruction Pointer (IP)**: A 16-bit register holding the memory offset of the next instruction to be fetched.
-    *   **Address Adder (Σ)**: A 20-bit hardware circuit that calculates the 20-bit physical address by shifting the segment register left by 4 bits and adding the offset:
+    *   **Segment Registers**: CS, DS, SS, ES (all 16-bit).
+    *   **Segment Registers**: Point to base addresses of 64KB blocks.
+    *   **Instruction Pointer (IP)**: Holds offset of next instruction.
+    *   **Address Adder (Σ)**: 20-bit math unit.
+    *   **Address Calculation**:
         Physical Address = (Segment Register x 10H) + Offset
-    *   **Instruction Queue (6-Byte)**: A 6-byte first-in, first-out (FIFO) storage queue. While the EU is executing instructions, the BIU pre-fetches up to 6 bytes of instruction code from memory and stores them in this queue, speeding up instruction execution.
-    *   *Queue Flush*: If a jump, call, or branch instruction occurs, the queue is cleared (flushed), and the BIU fetches the instruction from the new target address.
+    *   **Instruction Queue (6-Byte)**: Stores pre-fetched codes.
+    *   *Queue Flush*: Cleared on branch/jump; new fetches start immediately.
 
 ---
 
 ### 2. Execution Unit (EU) (Write in Exam):
 
-*   **Role**: Decodes instructions from the queue and executes them.
+*   **Role**: Decodes and executes instructions.
 *   **Components**:
-    *   **ALU (Arithmetic Logic Unit)**: A 16-bit ALU that performs arithmetic (+, -, *, /) and logic (AND, OR, XOR, shifts) operations.
-    *   **General Purpose Registers**: 16-bit registers (**AX, BX, CX, DX, SP, BP, SI, DI**) used to store operands and offset addresses.
-    *   **Instruction Decoder**: Decodes instructions read from the queue and converts them into control signals for the execution unit.
-    *   **Flag Register**: A 16-bit register tracking CPU status flags.
+    *   **ALU (16-bit)**: Performs math and logic operations.
+    *   **Registers**: General, pointer, and index registers.
+    *   **Instruction Decoder**: Translates queue bytes into CPU steps.
+    *   **Flag Register**: 16-bit status register.
 
 ---
 
@@ -114,80 +132,76 @@
 
 ## Q13. Explain programmer's model (register organization) of 8086 (7 Marks)
 
-*   **Register Set**: The 8086 contains **14 user-accessible registers**, each **16-bit** wide. They are grouped based on their functions.
+*   **Register Set**:
+    *   Total of 14 user registers.
+    *   All registers are 16-bit wide.
+    *   Grouped by execution roles.
 
 ---
 
 ### Register Groups (Write in Exam):
 
-*   **1. General Purpose Registers** (can be split into High and Low 8-bit registers):
-    *   **AX (Accumulator = AH + AL)**: Primary register for arithmetic, logical, multiplication, division, and I/O port operations.
-    *   **BX (Base = BH + BL)**: Used as a base register to hold memory offset pointers for data segment addressing.
-    *   **CX (Count = CH + CL)**: Used as a loop counter in loop instructions and as a shift counter during bit shifts.
-    *   **DX (Data = DH + DL)**: Holds high-order bits in 32-bit multiplication/division and stores I/O port addresses during indirect I/O instructions.
-*   **2. Segment Registers** (holds base starting addresses of 64KB blocks):
-    *   **CS (Code Segment)**: Points to memory block with executable code.
-    *   **DS (Data Segment)**: Points to memory block with active variables and data.
-    *   **SS (Stack Segment)**: Points to memory block storing the stack.
-    *   **ES (Extra Segment)**: Points to extra data space (used in string operations).
-*   **3. Pointer and Index Registers** (used as offsets within segments):
-    *   **SP (Stack Pointer)**: Paired with SS; points to the top of the stack.
-    *   **BP (Base Pointer)**: Paired with SS; used to access parameter data on the stack.
-    *   **SI (Source Index)**: Paired with DS; points to the source string operand in string instructions.
-    *   **DI (Destination Index)**: Paired with ES; points to the destination string operand in string instructions.
-    *   **IP (Instruction Pointer)**: Paired with CS; holds the offset address of the next instruction.
+*   **1. General Purpose Registers** (can be split into AH/AL, BH/BL, CH/CL, DH/DL):
+    *   **AX (Accumulator)**: Used for math, division, and I/O tasks.
+    *   **BX (Base)**: Holds base address pointer for data.
+    *   **CX (Count)**: Loop counter and shift count register.
+    *   **DX (Data)**: Stores high-order multiply/divide bits and I/O ports.
+*   **2. Segment Registers** (holds base starting addresses):
+    *   **CS (Code Segment)**: Holds instructions start address.
+    *   **DS (Data Segment)**: Holds variables start address.
+    *   **SS (Stack Segment)**: Holds stack start address.
+    *   **ES (Extra Segment)**: Holds destination address for strings.
+*   **3. Pointer and Index Registers** (holds offset values):
+    *   **SP (Stack Pointer)**: Points to top of stack.
+    *   **BP (Base Pointer)**: Accesses stack variables.
+    *   **SI (Source Index)**: Points to source string.
+    *   **DI (Destination Index)**: Points to destination string.
+    *   **IP (Instruction Pointer)**: Holds next instruction offset.
 *   **4. Flags Register (9 Active Flags)**:
-    *   *Status Flags (6)*: **CF** (Carry Flag - sets on arithmetic carry/borrow), **PF** (Parity Flag - sets if low byte has even number of 1s), **AF** (Auxiliary Carry - used for BCD arithmetic), **ZF** (Zero Flag - sets if result is 0), **SF** (Sign Flag - matches MSB of result), **OF** (Overflow Flag - sets if signed result exceeds range).
-    *   *Control Flags (3)*: **TF** (Trap Flag - enables single-step debugging), **IF** (Interrupt Enable - enables/disables maskable interrupts), **DF** (Direction Flag - controls string auto-increment or auto-decrement).
+    *   *Status Flags (6)*: CF (Carry), PF (Parity), AF (Aux Carry), ZF (Zero), SF (Sign), OF (Overflow).
+    *   *Control Flags (3)*: TF (Trap debug), IF (Interrupt Enable), DF (Direction).
 
 ---
 ---
 
 ## Q14. Explain with examples: Immediate, Register, Direct, and Indirect Addressing Modes (7 Marks)
 
-*   **Addressing Mode**: The method or format the 8086 microprocessor uses to locate and access operands (data) for execution.
+*   **Addressing Mode**: Method used by the CPU to find operand data.
 
 ---
 
 ### The Four Main Modes & Detailed Formulas (Write in Exam):
 
 1.  **Immediate Addressing Mode**:
-    *   *Definition*: The operand data is a constant value included directly within the instruction itself.
+    *   *Definition*: Data value is inside the instruction.
     *   *Example*:
         ```assembly
-        MOV AX, 5000H     ; Copy hex constant 5000H into AX register
-        MOV CL, 10        ; Copy decimal constant 10 into CL register
+        MOV AX, 5000H     ; Copy hex 5000H to AX
+        MOV CL, 10        ; Copy decimal 10 to CL
         ```
 2.  **Register Addressing Mode**:
-    *   *Definition*: The operand data is stored in one of the CPU registers. It executes very fast because it requires no external memory access.
+    *   *Definition*: Data is stored inside CPU registers.
     *   *Example*:
         ```assembly
-        MOV AX, BX        ; Copy 16-bit BX value into AX register
-        ADD CX, DX        ; Add 16-bit DX value to CX register
+        MOV AX, BX        ; Copy BX to AX
+        ADD CX, DX        ; Add DX to CX
         ```
 3.  **Direct Addressing Mode**:
-    *   *Definition*: The 16-bit memory offset address of the data is written directly inside the instruction (enclosed in square brackets).
+    *   *Definition*: 16-bit offset address is written inside brackets.
     *   *Example*:
         ```assembly
-        MOV AX, [1234H]   ; Read memory location DS:1234H into AX register
+        MOV AX, [1234H]   ; Read from memory offset 1234H
         ```
-    *   *Address Calculation*: If DS = 1000H, the physical memory address is calculated as:
-        Physical Address = (DS x 10H) + Offset = (1000H x 10H) + 1234H = 11234H
+    *   *Calculation*: If DS = 1000H:
+        Physical Address = (DS x 10H) + Offset = 11234H
 4.  **Register Indirect Addressing Mode**:
-    *   *Definition*: The memory offset address of the operand is stored in an index or base register (**BX, SI, DI,** or **BP**).
+    *   *Definition*: Offset is stored inside pointer register (BX, SI, DI, BP).
     *   *Example*:
         ```assembly
-        MOV AX, [SI]      ; Load data from memory address stored in SI
+        MOV AX, [SI]      ; Read memory at address in SI
         ```
-    *   *Address Calculation*: If DS = 2000H and SI = 0100H:
-        Physical Address = (DS x 10H) + SI = (2000H x 10H) + 0100H = 20100H
-
----
-
-### Other Addressing Modes (Briefly Mention in Exam):
-*   **Based Addressing**: Offset is calculated as `[BX + Offset]` or `[BP + Offset]`.
-*   **Indexed Addressing**: Offset is calculated as `[SI + Offset]` or `[DI + Offset]`.
-*   **Based-Indexed Addressing**: Offset is calculated as `[BX + SI]`, `[BX + DI]`, `[BP + SI]`, or `[BP + DI]`.
+    *   *Calculation*: If DS = 2000H and SI = 0100H:
+        Physical Address = (DS x 10H) + SI = 20100H
 
 ---
 ---
@@ -198,47 +212,33 @@
 
 ### Classification (Write in Exam):
 
-The 8086 instruction set is classified into **6 functional categories**:
-1.  **Data Transfer Instructions** (copies data between locations).
-2.  **Arithmetic Instructions** (performs mathematical calculations).
-3.  **Bit Manipulation/Logical Instructions** (performs logical AND, OR, XOR, and bit shifts).
-4.  **String Instructions** (performs operations on arrays of bytes or words).
-5.  **Program Execution Control Instructions** (handles loops, conditional/unconditional jumps, and calls).
-6.  **Processor Control Instructions** (manages flags and system modes).
+Classified into **6 categories**:
+1.  **Data Transfer Instructions** (copies data).
+2.  **Arithmetic Instructions** (performs math calculations).
+3.  **Logical/Bit Instructions** (AND, OR, XOR, shifts).
+4.  **String Instructions** (processes data arrays).
+5.  **Program Control Instructions** (loops, jumps, calls).
+6.  **Processor Control Instructions** (manages status flags).
 
 ---
 
 ### Two Categories in Detail (Write in Exam):
 
 *   **1. Data Transfer Instructions**:
-    *   *Purpose*: Used to copy data bytes or words between registers, memory, and I/O ports. They do **not** affect status flags.
-    *   *Key Commands & Examples*:
-        *   `MOV dest, src`: Copies data.
-            ```assembly
-            MOV AX, 2000H     ; Copies constant 2000H into AX
-            MOV BX, AX        ; Copies AX into BX
-            ```
-        *   `PUSH src` / `POP dest`: Pushes/pops data onto/from the stack.
-            ```assembly
-            PUSH AX           ; Saves AX value on stack
-            POP DX            ; Restores saved value into DX
-            ```
-        *   `IN` / `OUT`: Reads/writes data from/to I/O ports.
-            ```assembly
-            IN AL, 80H        ; Read byte from port 80H into AL
-            ```
+    *   *Purpose*: Copies data between registers, memory, and ports.
+    *   *Rule*: Does not change status flags.
+    *   *Examples*:
+        ```assembly
+        MOV AX, 2000H     ; Copy 2000H to AX
+        PUSH AX           ; Push AX value to stack
+        POP DX            ; Pop top of stack into DX
+        ```
 *   **2. Arithmetic Instructions**:
-    *   *Purpose*: Perform mathematical calculations on binary/BCD operands. They **do** update status flags (ZF, CF, SF, OF, etc.).
-    *   *Key Commands & Examples*:
-        *   `ADD` / `SUB`: Performs addition and subtraction.
-            ```assembly
-            ADD AX, BX        ; AX = AX + BX
-            ```
-        *   `INC` / `DEC`: Increments or decrements a register/memory location by 1.
-            ```assembly
-            INC CX            ; CX = CX + 1
-            ```
-        *   `CMP dest, src`: Compares two values by subtracting them internally and setting flags without changing the operands.
-            ```assembly
-            CMP AL, 5         ; Compares AL with 5
-            ```
+    *   *Purpose*: Performs math calculations.
+    *   *Rule*: Updates status flags (ZF, CF, SF, etc.).
+    *   *Examples*:
+        ```assembly
+        ADD AX, BX        ; AX = AX + BX
+        INC CX            ; CX = CX + 1
+        CMP AL, 5         ; Compare AL with 5
+        ```

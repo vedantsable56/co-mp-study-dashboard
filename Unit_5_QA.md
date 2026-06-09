@@ -4,30 +4,34 @@
 
 ## Q21. Explain closely coupled and loosely coupled multiprocessor systems with comparison. (6 Marks)
 
-*   **Multiprocessor System**: A computer system containing two or more CPUs working together to process instructions in parallel, sharing the computational workload to increase throughput. They are classified based on the degree of memory sharing.
+*   **Multiprocessor System**:
+    *   Contains two or more CPUs working together.
+    *   Processes instructions in parallel.
+    *   Shares workload to increase performance.
+    *   Classified by degree of memory sharing.
 
 ---
 
 ### Closely Coupled Systems (Write in Exam):
 
-*   **Memory Structure**: Processors share a single centralized main memory space (Uniform Memory Access - UMA).
-*   **Communication**: Processors communicate directly through shared variables, semaphores, and message queues in the common memory.
-*   **Interconnection**: Processors are connected to memory via a shared system bus, multiport memory, or a high-speed crossbar switch.
-*   **Operating System**: Typically controlled by a single, unified instance of the Operating System that coordinates task scheduling.
-*   **Bus Contention**: High. As more CPUs are added, they fight for access to the shared system bus and memory, causing delays.
-*   **Scalability**: Low. Limited scalability (usually under 32 processors) due to bus and memory bandwidth saturation.
-*   **Data Rate**: Very high speed with extremely low latency due to direct memory access.
+*   **Memory Structure**: Processors share a single central memory (UMA).
+*   **Communication**: CPUs communicate through variables in shared memory.
+*   **Interconnection**: Connected via system bus or crossbar switch.
+*   **Operating System**: Controlled by a single, shared OS instance.
+*   **Bus Contention**: High bus conflict as CPU count grows.
+*   **Scalability**: Low; limited to under 32 processors.
+*   **Data Rate**: High speed; very low delay.
 
 ---
 
 ### Loosely Coupled Systems (Write in Exam):
 
-*   **Memory Structure**: Each processor has its own dedicated local (private) memory and I/O channels.
-*   **Communication**: Processors do not share memory; they communicate by passing packets of data over an interconnection network (message-passing network).
-*   **Operating System**: Each processor runs its own local copy of the Operating System.
-*   **Scalability**: High. Highly scalable. You can connect hundreds or thousands of nodes without bus bottlenecks.
-*   **Fault Tolerance**: High. If one node (processor or its memory) fails, the remaining nodes can continue running, preventing system-wide failure.
-*   **Data Rate**: Slower transfer speed and higher latency due to network communication protocols and message-passing overhead.
+*   **Memory Structure**: Each processor has local memory and I/O.
+*   **Communication**: CPUs pass packets over a message network.
+*   **Operating System**: Each CPU runs its own local OS copy.
+*   **Scalability**: High; scales to thousands of nodes.
+*   **Fault Tolerance**: High; node failure does not crash the system.
+*   **Data Rate**: Slower speeds with higher delay.
 
 ---
 
@@ -57,36 +61,44 @@
 | **OS** | Single shared OS | Multiple independent OS |
 | **Scalability** | Low | High |
 | **Fault Tolerance** | Lower | Higher |
-| **Latency** | Low (nanoseconds) | High (microseconds to milliseconds) |
+| **Delay** | Low (nanoseconds) | High (microseconds) |
 
 ---
 ---
 
 ## Q22. Explain Symmetric Multiprocessor (SMP) organization with diagram. (7 Marks)
 
-*   **SMP**: A closely coupled shared-memory architecture where two or more **identical, general-purpose processors** share a single main memory and I/O channels. All processors have equal privileges and equal access speeds, with no master-slave hierarchy.
+*   **SMP**:
+    *   Closely coupled system with identical CPUs.
+    *   Processors share single memory and I/O.
+    *   Uniform memory access speeds.
+    *   No master-slave relationship.
 
 ---
 
 ### Key Features (Write in Exam):
 
-*   **Identical Processors**: All processors are identical and have equal privileges. Any processor can run any task, including OS kernel code and I/O handlers.
-*   **Shared Memory & I/O**: Processors share a single main memory and I/O subsystem via a common system bus.
-*   **UMA (Uniform Memory Access)**: Every processor takes the same amount of time to access any location in the shared main memory.
-*   **Private Caches**: Each processor has its own private L1/L2 cache to reduce system bus traffic.
-*   **Single OS**: A single copy of the Operating System runs on the SMP, managing all processors and scheduling tasks evenly.
+*   **Identical Processors**: All CPUs have equal privileges.
+*   **Shared Memory & I/O**: Share components via common system bus.
+*   **UMA (Uniform Memory Access)**: Access speed to RAM is equal.
+*   **Private Caches**: Each CPU has private cache to reduce bus traffic.
+*   **Single OS**: One OS manages schedules and tasks.
 
 ---
 
-### Cache Coherence & MESI Protocol:
+### Cache Consistency & MESI Protocol:
 
-*   *The Cache Coherence Problem*: Since each processor has its own private cache, multiple caches might hold copies of the same memory location. If one CPU updates its cache block, the other CPU caches will contain stale data.
-*   *The MESI Protocol*: Maintains cache consistency by tracking the state of each cache line using 4 states:
-    *   **M (Modified)**: The cache line is modified (dirty) and is different from main memory. It exists only in the current cache.
-    *   **E (Exclusive)**: The cache line matches main memory and exists only in the current cache.
-    *   **S (Shared)**: The cache line matches main memory and exists in other processor caches as well.
-    *   **I (Invalid)**: The cache line does not contain valid data; it must be re-read from memory on the next access.
-*   *Snooping*: Cache controllers monitor (snoop) the shared system bus to invalidate or update their own cache lines when they detect a write to a shared address by another CPU.
+*   *The Cache Consistency Problem*:
+    *   CPUs have private caches.
+    *   Multiple caches can hold copies of same memory address.
+    *   If one CPU writes to cache, other caches get stale data.
+*   *The MESI Protocol*:
+    *   Maintains consistency using 4 states:
+    *   **M (Modified)**: Cache is modified (dirty); memory is old.
+    *   **E (Exclusive)**: Cache matches memory; exists only here.
+    *   **S (Shared)**: Cache matches memory; exists in other caches.
+    *   **I (Invalid)**: Cache data is old and invalid.
+*   *Snooping*: Cache controllers watch the bus to update/invalidate lines.
 
 ---
 
@@ -115,24 +127,28 @@
 
 ## Q23. Explain Flynn's Taxonomy for multiple processor organizations with diagram. (7 Marks)
 
-*   **Flynn's Taxonomy**: A classification of computer architectures introduced by Michael J. Flynn in 1966. It groups computers into **4 classes** based on the number of concurrent **Instruction Streams** and **Data Streams** active at any time.
+*   **Flynn's Taxonomy**:
+    *   Classification of computer systems (Michael Flynn, 1966).
+    *   Based on number of concurrent instruction streams.
+    *   Based on number of concurrent data streams.
 
 ---
 
 ### The Four Classes (Write in Exam):
 
 1.  **SISD (Single Instruction, Single Data)**:
-    *   *Operation*: A single control unit decodes a single instruction stream to process a single data stream sequentially.
-    *   *Examples*: Traditional single-core PCs, older mainframes.
+    *   *Operation*: 1 instruction stream processes 1 data stream sequentially.
+    *   *Examples*: Traditional single-core computers.
 2.  **SIMD (Single Instruction, Multiple Data)**:
-    *   *Operation*: A single control unit broadcasts a single instruction to multiple processing elements. Each processing element executes the same instruction on **different data elements** in parallel.
-    *   *Examples*: Vector processors, GPUs (Graphics Processing Units) for graphics/AI, MMX instructions.
+    *   *Operation*: 1 instruction controls multiple execution units.
+    *   *Operation*: Each processes different data in parallel.
+    *   *Examples*: GPUs, vector processors.
 3.  **MISD (Multiple Instruction, Single Data)**:
-    *   *Operation*: Multiple processing elements execute different instructions on the **same data stream** simultaneously.
-    *   *Examples*: Mostly theoretical. Used in high-reliability redundant systems, like space shuttle flight computers.
+    *   *Operation*: Multiple instructions process same data stream.
+    *   *Examples*: Space Shuttle flight computers (redundancy).
 4.  **MIMD (Multiple Instruction, Multiple Data)**:
-    *   *Operation*: Multiple independent processors execute different instruction streams on different data streams in parallel.
-    *   *Examples*: Modern multi-core CPUs, compute clusters, distributed servers.
+    *   *Operation*: Multiple CPUs run different instruction/data streams.
+    *   *Examples*: Modern multi-core PCs, compute clusters.
 
 ---
 
@@ -158,10 +174,10 @@
 
 | Class | Instruction Streams | Data Streams | Execution | Example |
 | :--- | :---: | :---: | :--- | :--- |
-| **SISD** | 1 | 1 | Serial / Sequential | Single-core PC |
-| **SIMD** | 1 | Multiple | Vector parallel | GPU |
+| **SISD** | 1 | 1 | Sequential | Single-core PC |
+| **SIMD** | 1 | Multiple | Parallel | GPU |
 | **MISD** | Multiple | 1 | Redundant | Flight controls |
-| **MIMD** | Multiple | Multiple | Task parallel | Multi-core CPU |
+| **MIMD** | Multiple | Multiple | Parallel | Multi-core CPU |
 
 ---
 ---
@@ -171,25 +187,31 @@
 ---
 
 ### Core Concepts (Write in Exam):
-*   **UMA (Uniform Memory Access)**: A shared-memory system where all processors connect to a single centralized physical memory. The access time to any memory location is **equal** for all processors.
-*   **NUMA (Non-Uniform Memory Access)**: A shared-memory system where the memory is physically distributed next to each processor. A processor can access its **local memory** quickly, but accessing **remote memory** (the memory of another processor node) takes much longer.
+*   **UMA (Uniform Memory Access)**:
+    *   Shared-memory multiprocessor.
+    *   All CPUs connect to centralized memory.
+    *   Access time to RAM is equal for all CPUs.
+*   **NUMA (Non-Uniform Memory Access)**:
+    *   Shared-memory multiprocessor.
+    *   Memory is physically distributed close to each CPU.
+    *   Local memory access is fast; remote memory access is slow.
 
 ---
 
 ### Key Differences (Write in Exam):
 
-*   **Access Latency**:
-    *   *UMA*: Equal access time for all physical addresses.
-    *   *NUMA*: Varying access times (local memory access is fast; remote memory access across the interconnect is slow).
+*   **Access Time**:
+    *   *UMA*: Equal access time for all addresses.
+    *   *NUMA*: Varying access times (local is fast, remote is slow).
 *   **Scalability**:
-    *   *UMA*: Low scalability. Adding too many CPUs saturates the shared bus, causing performance to drop (typically maxes out at 16–32 CPUs).
-    *   *NUMA*: High scalability. Can scale to hundreds of processors because each processor node has its own local memory bus.
-*   **Cache Coherence Mechanism**:
-    *   *UMA*: Uses **Bus Snooping** (like MESI) which relies on broadcasting write signals over the shared bus.
-    *   *NUMA*: Uses **Directory-Based Coherence** because broadcasting write signals over a network does not scale.
+    *   *UMA*: Low scalability; shared bus gets overloaded.
+    *   *NUMA*: High scalability; adding nodes adds local memory.
+*   **Cache Consistency Mechanism**:
+    *   *UMA*: Uses Bus Snooping (like MESI).
+    *   *NUMA*: Uses Directory-Based consistency.
 *   **Programming Complexity**:
-    *   *UMA*: Simple. Programmers do not need to worry about where data is placed in memory.
-    *   *NUMA*: High. To prevent performance loss, programmers must optimize code for **data locality** (ensuring threads process data stored in their local RAM).
+    *   *UMA*: Simple; memory locations are uniform.
+    *   *NUMA*: High; must optimize code for data locality.
 
 ---
 
@@ -213,7 +235,7 @@
 | **Access speed** | Uniform | Non-uniform |
 | **Scalability** | Low (Typically < 32 CPUs) | High (Thousands of CPUs) |
 | **Interconnect** | Shared bus or Crossbar | Scalable Interconnect Network |
-| **Coherence Method**| Bus Snooping (MESI) | Directory-based |
+| **Consistency Method**| Bus Snooping (MESI) | Directory-based |
 
 ---
 ---
@@ -223,31 +245,37 @@
 ---
 
 ### Core Concepts (Write in Exam):
-*   **RISC**: Reduced Instruction Set Computer. CPU design focused on execution speed. It uses a **small set of simple, single-cycle instructions** and relies on a compiler to optimize instruction execution.
-*   **CISC**: Complex Instruction Set Computer. CPU design focused on hardware capabilities. It uses a **large set of complex, variable-length instructions** that can perform multiple steps (like loading from memory, calculating, and storing back) in a single instruction.
+*   **RISC**:
+    *   Reduced Instruction Set Computer.
+    *   Uses small set of simple, single-cycle instructions.
+    *   Relies on compiler optimization.
+*   **CISC**:
+    *   Complex Instruction Set Computer.
+    *   Uses large set of multi-cycle instructions.
+    *   Performs complex multi-step operations in single instruction.
 
 ---
 
 ### Key Differences (Write in Exam):
 
-*   **Instruction Format & Size**:
-    *   *RISC*: Fixed instruction size (typically 32-bit). Simplifies and speeds up instruction decoding.
-    *   *CISC*: Variable instruction size (1 to 15 bytes in x86). Requires complex decoding circuits.
+*   **Instruction Size**:
+    *   *RISC*: Fixed size (typically 32-bit); fast decoding.
+    *   *CISC*: Variable size (1 to 15 bytes); complex decoding.
 *   **Execution Time (CPI)**:
-    *   *RISC*: Almost all instructions execute in a single clock cycle (CPI ≈ 1).
-    *   *CISC*: Instructions take multiple clock cycles to execute (CPI ranges from 2 to 20+).
+    *   *RISC*: Almost all instructions run in 1 cycle (CPI ≈ 1).
+    *   *CISC*: Instructions take multiple cycles (CPI 2 to 20+).
 *   **Memory Access**:
-    *   *RISC*: **Load-Store Architecture**. Only `LOAD` and `STORE` instructions can access memory. All arithmetic operations must take place between registers.
-    *   *CISC*: Any instruction can access memory directly (e.g., `ADD [mem], reg`).
+    *   *RISC*: Load-store model (only LOAD/STORE access memory).
+    *   *CISC*: Direct memory access in any instruction.
 *   **Registers**:
-    *   *RISC*: Contains a large register file (typically 32 or more general-purpose registers).
-    *   *CISC*: Contains a small register file (typically 8 to 16 general-purpose registers).
+    *   *RISC*: Large register file (typically 32+ registers).
+    *   *CISC*: Small register file (typically 8 to 16).
 *   **Control Unit Design**:
-    *   *RISC*: Hardwired control unit (fast combinational logic circuits).
-    *   *CISC*: Microprogrammed control unit (slower microcode ROM).
+    *   *RISC*: Hardwired control unit (combinational logic).
+    *   *CISC*: Microprogrammed control unit (microcode ROM).
 *   **Pipelining**:
-    *   *RISC*: Easy to pipeline due to fixed instruction sizes and single-cycle execution.
-    *   *CISC*: Difficult to pipeline because of variable instruction lengths and variable execution times.
+    *   *RISC*: Easy to pipeline due to fixed sizes.
+    *   *CISC*: Hard to pipeline due to variable times/sizes.
 
 ---
 
@@ -261,4 +289,4 @@
 | **General Registers**| Many (32+) | Few (8–16) |
 | **Control Unit** | Hardwired | Microprogrammed |
 | **Pipelining** | Easy and efficient | Difficult |
-| **Examples** | ARM (mobile chips), RISC-V | Intel x86, AMD |
+| **Examples** | ARM, RISC-V | Intel x86, AMD |
