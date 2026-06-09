@@ -20,6 +20,9 @@
     *   Used in Write-Back to track cache modifications.
     *   Dirty bit = 1: Cache line was changed; must write to RAM before removing.
     *   Dirty bit = 0: Cache matches RAM; can be removed without writing.
+*   **Typical Applications**:
+    *   *Write-Through*: Used in databases, network servers, and simple L1 caches where data loss is not allowed.
+    *   *Write-Back*: Used in high-performance L2 and L3 CPU caches, GPUs, and OS paging files where speed is the main goal.
 
 ---
 
@@ -37,6 +40,7 @@
 | **8. Overall Performance**| Lower write performance. | Higher write performance. |
 | **9. Write Buffer** | Often needs a write buffer to avoid CPU stalls. | Not required for normal writes. |
 | **10. Multi-CPU Systems** | Easier to keep data matching across CPUs. | Harder to keep data matching across CPUs. |
+| **11. Typical Application**| Database log storage, simple L1 CPU caches. | PC/Server CPU L2/L3 caches, GPU graphics memory. |
 
 ---
 ---
@@ -57,6 +61,10 @@
     *   **Tag**: Stores block identity to verify if it is the correct memory location.
     *   **Index / Set Index**: Tells the CPU which specific cache line or set to look in.
     *   **Offset**: Selects the specific byte/word from the cached block.
+*   **Typical Applications**:
+    *   *Direct Mapping*: Used in simple microcontrollers and primary L1 instruction caches where budget is low.
+    *   *Fully Associative Mapping*: Used in Translation Lookaside Buffers (TLBs) where address lookups must be conflict-free.
+    *   *Set-Associative Mapping*: Used in modern CPU L1 data, L2, and L3 caches (Intel/AMD/ARM) as the standard high-performance balance.
 
 ---
 
@@ -84,6 +92,7 @@
 | **8. Design Complexity** | Very simple design. | Very complex design. | Moderately complex design. |
 | **9. Cache Utilization** | Lower cache utilization. | Best cache utilization. | Good cache utilization. |
 | **10. Risk of Thrashing**| High risk (constant line swaps).| Zero risk (no index conflicts).| Low risk. |
+| **11. Typical Application**| L1 instruction caches, simple systems. | Translation Lookaside Buffers (TLBs). | L1 data, L2, and L3 CPU caches. |
 
 ---
 ---
