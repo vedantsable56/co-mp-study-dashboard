@@ -2,62 +2,49 @@ import os
 import re
 
 def clean_content(content):
-    # First, run specific string replacements to handle latex commands
+    # 1. Replace \overline{TEXT} with T̅E̅X̅T̅ (combining overline after every character)
+    def replace_overline(match):
+        text = match.group(1)
+        # Apply combining overline \u0305 to each character in the text
+        return "".join(c + "\u0305" for c in text)
+    
+    content = re.sub(r'\\overline\{([^\}]+)\}', replace_overline, content)
+    
+    # 2. Replace \frac{NUM}{DEN} with NUM/DEN
+    content = re.sub(r'\\frac\{([^\}]+)\}\{([^\}]+)\}', r'\1/\2', content)
+    
+    # 3. Replace \text{TEXT} with TEXT
+    content = re.sub(r'\\text\{([^\}]+)\}', r'\1', content)
+    
+    # 4. Replace \mathbf{TEXT} with TEXT (or **TEXT** for bold)
+    content = re.sub(r'\\mathbf\{([^\}]+)\}', r'\1', content)
+    
+    # 5. Math symbols replacements
     replacements = [
-        ('\\cdot', '·'),
-        ('\\oplus', '⊕'),
-        ('\\leftarrow', '←'),
-        ('\\rightarrow', '→'),
-        ('\\pm', '±'),
-        ('\\times', 'x'),
-        ('\\Delta t', 'Δt'),
-        ('\\approx', '≈'),
-        ('\\overline{WR}', 'WR̅'),
-        ('\\overline{DEN}', 'DEN̅'),
-        ('DT/\\overline{R}', 'DT/R̅'),
-        ('\\overline{BHE}', 'BHE̅'),
-        ('\\overline{RD}', 'RD̅'),
-        ('\\Sigma', 'Σ'),
-        ('\\bmod', 'mod'),
-        ('\\text{Total Access Time} = \\text{Seek Time} + \\text{Rotational Delay} + \\text{Transfer Time}', 'Total Access Time = Seek Time + Rotational Delay + Transfer Time'),
-        ('\\text{Average Rotational Delay} = \\frac{1}{2} \\times \\frac{60}{\\text{RPM}}\\text{ seconds}', 'Average Rotational Delay = 1/2 * (60 / RPM) seconds'),
-        ('\\text{Cache Line} = (\\text{Memory Block}) mod (\\text{Total Lines})', 'Cache Line = (Memory Block) mod (Total Lines)'),
-        ('\\text{Physical Address} = (\\text{Segment Register} \\times 10\\text{H}) + \\text{Offset Register}', 'Physical Address = (Segment Register * 10H) + Offset Register'),
-        ('\\text{Physical Address} = (\\text{Segment Register} \\times 10\\text{H}) + \\text{Offset}', 'Physical Address = (Segment Register * 10H) + Offset'),
-        ('\\text{IVT Address} = \\text{Interrupt Type} \\times 4', 'IVT Address = Interrupt Type * 4'),
-        ('\\mathbf{1111\\ 0100}', '1111 0100'),
-        ('\\mathbf{0000\\ 1011}', '0000 1011'),
-        ('\\mathbf{0000\\ 1100}', '0000 1100'),
-        ('\\mathbf{11111\\ 10001}', '11111 10001'),
-        ('\\mathbf{-15}', '-15'),
-        ('\\mathbf{00101}', '00101'),
-        ('\\mathbf{11011}', '11011'),
-        ('\\mathbf{11101}', '11101'),
-        ('\\mathbf{0011}', '0011'),
-        ('\\mathbf{1101}', '1101'),
-        ('\\mathbf{1100}', '1100'),
-        ('\\frac{1}{2}', '1/2')
+        (r'\cdot', '·'),
+        (r'\oplus', '⊕'),
+        (r'\leftarrow', '←'),
+        (r'\rightarrow', '→'),
+        (r'\pm', '±'),
+        (r'\times', 'x'),
+        (r'\Delta t', 'Δt'),
+        (r'\approx', '≈'),
+        (r'\bmod', 'mod'),
+        (r'\Sigma', 'Σ'),
+        (r'\le', '≤'),
+        (r'\ge', '≥'),
     ]
     
-    # Specific string replaces
     for pattern, replacement in replacements:
         content = content.replace(pattern, replacement)
-        
-    # Remove any remaining single dollar signs around variables or formulas
-    content = re.sub(r'\$([^\$\n]+)\$', r'\1', content)
-    
-    # Secondary cleanup for standard math symbols in case they were left in different formats
-    content = content.replace(r'\Delta t', 'Δt')
-    content = content.replace(r'\approx', '≈')
-    content = content.replace(r'\cdot', '·')
-    content = content.replace(r'\oplus', '⊕')
-    content = content.replace(r'\leftarrow', '←')
-    content = content.replace(r'\rightarrow', '→')
-    content = content.replace(r'\pm', '±')
-    content = content.replace(r'\times', 'x')
-    
-    # Remove double dollars for block math equations if any exist
+        # Also clean up double-backslash versions if any
+        content = content.replace(pattern.replace('\\', '\\\\'), replacement)
+
+    # 6. Remove double dollars for block math equations (retain inner content)
     content = re.sub(r'\$\$(.*?)\$\$', r'\1', content, flags=re.DOTALL)
+    
+    # 7. Remove single dollar signs around inline math
+    content = re.sub(r'\$([^\$\n]+)\$', r'\1', content)
     
     return content
 
