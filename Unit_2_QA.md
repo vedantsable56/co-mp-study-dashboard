@@ -4,117 +4,38 @@
 
 ## Q6. Explain the Difference Between Write-Through and Write-Back Policies (6 Marks)
 
-*   **The Cache Consistency Problem**:
-    *   Cache is a fast, temporary copy of main memory.
-    *   Writes from CPU must keep memory updated.
-    *   If only cache updates, main memory gets old (stale) data.
-    *   We must decide when to update main memory.
+### Short Definition & Core Concept:
+*   **The Cache Write Problem**: When the CPU writes or updates data, it changes it in the fast cache. We must choose when to update the slower main memory (RAM) to keep data matching.
+*   **Write-Through Policy**: Updates both the cache and the RAM at the same time on every single write.
+*   **Write-Back Policy**: Updates only the cache line immediately. RAM is updated later, only when that cache line is removed to make space.
 
 ---
 
-### Write-Through Policy (Write in Exam):
+### Comparison Table (Write in Exam):
 
-*   **Operation**:
-    *   CPU writes data to both cache and RAM.
-    *   This happens at the same time.
-*   **Write Buffer**:
-    *   Writing to memory is slow.
-    *   CPU writes to a queue called a Write Buffer.
-    *   CPU immediately continues execution.
-    *   Controller writes buffer data to RAM in background.
-    *   If buffer is full, CPU must wait.
-*   **Data Consistency**:
-    *   Excellent safety.
-    *   Cache and memory are always matching.
-*   **Design Complexity**:
-    *   Very simple.
-    *   No complex tracking states are needed.
-*   **Performance Penalty**:
-    *   Slower.
-    *   Consecutive writes cause buffer to fill up.
-*   **Bus Traffic**:
-    *   Very high.
-    *   Every write uses the system bus.
-*   **Data Safety**:
-    *   High.
-    *   No data is lost on sudden crashes.
-*   **Data Consistency in Multi-Processor**:
-    *   Very easy.
-    *   Other CPUs see memory updates immediately.
-
----
-
-### Write-Back Policy (Write in Exam):
-
-*   **Operation**:
-    *   CPU updates only the cache line.
-    *   RAM is not updated immediately.
-    *   RAM updates only when the block is removed.
-*   **Dirty Bit (Bookkeeping)**:
-    *   Each cache line has a status flag.
-    *   *Dirty Bit = 1*: Cache was changed; write to RAM on removal.
-    *   *Dirty Bit = 0*: Cache matches RAM; discard on removal.
-*   **Data Consistency**:
-    *   Temporary mismatch.
-    *   Memory holds old data until block removal.
-*   **Performance Advantage**:
-    *   Extremely fast.
-    *   Writes run at cache speed.
-*   **Bus Traffic**:
-    *   Very low.
-    *   Multiple writes to same block trigger only one RAM write.
-*   **Design Complexity**:
-    *   High.
-    *   Requires extra tracking bits.
-    *   Requires consistency protocols (like MESI) for multiple CPUs.
-
----
-
-### Comparison Table:
-
-| Feature | Write-Through | Write-Back |
+| Point / Feature | Write-Through Policy | Write-Back Policy |
 | :--- | :--- | :--- |
-| **Memory Update** | Instant (on write) | Delayed (on removal) |
-| **Write Speed** | Slower | Faster |
-| **System Bus Traffic** | High | Low |
-| **Dirty Bit?** | Not required | Required (tracks changes) |
-| **Implementation** | Simple | Complex |
-| **Crash Protection** | High (no data lost) | Lower (unsaved cache data lost) |
+| **1. Update Timing** | Instant (on every single write). | Delayed (only when block is removed). |
+| **2. Write Speed** | Slower (runs at slow RAM speed). | Faster (runs at fast cache speed). |
+| **3. Bus Traffic** | High (every write uses the system bus). | Low (only block removal uses the bus). |
+| **4. CPU Stalls** | Yes (happens if write buffer gets full). | No (CPU never waits for slow RAM). |
+| **5. Dirty Bit** | Not required. | Required (tracks if cache block changed). |
+| **6. Design Complexity** | Simple. | Highly complex. |
+| **7. Crash Safety** | High (no data is lost on sudden crash). | Lower (unsaved cache changes are lost). |
+| **8. Multi-CPU Consistency** | Simple (other CPUs see RAM updates instantly).| Complex (needs consistency tracking). |
+| **9. Hardware Component** | Uses a Write Buffer. | Uses a Cache Controller. |
+| **10. Storage Overhead** | No extra bits needed. | Requires dirty bit per cache line. |
 
 ---
 ---
 
 ## Q7. Compare the Three Cache Mapping Techniques: Direct, Associative, and Set-Associative (7 Marks)
 
-*   **Cache Mapping**:
-    *   Rules to place RAM blocks in smaller cache.
-    *   Defines the index search method.
-
----
-
-### The Three Mapping Methods (Write in Exam):
-
-*   **Direct Mapping**:
-    *   *Rule*: Each memory block maps to exactly one cache line.
-    *   *Formula*: Cache Line = (Memory Block) mod (Total Lines in Cache).
-    *   *Address fields*: Tag, Line Index, Word Offset.
-    *   *Lookup*: CPU checks one specific line index.
-    *   *Pros*: Simple hardware; only 1 tag comparator needed.
-    *   *Cons*: High conflict misses; causes constant swapping.
-*   **Fully Associative Mapping**:
-    *   *Rule*: A memory block can sit in any cache line.
-    *   *Address fields*: Tag, Word Offset.
-    *   *Lookup*: CPU searches all tags in parallel.
-    *   *Pros*: No conflict misses.
-    *   *Pros*: Block only removed when cache is full.
-    *   *Cons*: Expensive; requires content-search memory (CAM).
-    *   *Cons*: Needs N tag comparators (one for each line).
-*   **Set-Associative Mapping**:
-    *   *Rule*: Cache is divided into sets of K lines.
-    *   *Rule*: Block maps to set, sits in any line within set.
-    *   *Address fields*: Tag, Set Index, Word Offset.
-    *   *Lookup*: CPU checks set index, searches K lines in parallel.
-    *   *Pros*: Best compromise; reduces misses with fair cost.
+### Short Definition & Core Concept:
+*   **Cache Mapping**: Rules that define where a main memory block is placed inside the smaller cache memory.
+*   **Direct Mapping**: Each memory block maps to exactly one specific cache line.
+*   **Fully Associative Mapping**: A memory block can be placed in any cache line.
+*   **Set-Associative Mapping**: Cache is split into sets; block maps to a set, and can sit in any line within that set.
 
 ---
 
@@ -128,16 +49,20 @@
 
 ---
 
-### Comparison Table:
+### Comparison Table (Write in Exam):
 
-| Feature | Direct Mapping | Fully Associative | Set-Associative (K-way) |
+| Point / Feature | Direct Mapping | Fully Associative Mapping | Set-Associative Mapping |
 | :--- | :--- | :--- | :--- |
-| **Block Location** | 1 fixed line | Any line | Any line in a set |
-| **Conflict Misses** | Highest | Zero | Low |
-| **Tag Comparators** | 1 | N (Total lines) | K (Set size) |
-| **Hardware Cost** | Lowest | Highest (needs CAM) | Moderate |
-| **Replacement Rule** | Not needed | Needed (LRU, FIFO) | Needed (LRU, FIFO) |
-| **Common Use** | L1 cache | Translation Buffers (TLBs)| L1, L2, L3 in modern CPUs |
+| **1. Block Location** | Only 1 fixed cache line. | Any line in the cache. | Any line within a specific set. |
+| **2. Address Fields** | Tag, Line Index, Word Offset. | Tag, Word Offset. | Tag, Set Index, Word Offset. |
+| **3. Tag Comparators**| Only 1 comparator. | N comparators (one for every line). | K comparators (one for each line in set). |
+| **4. Conflict Misses**| Highest (very frequent swaps). | Zero (no conflicts). | Low. |
+| **5. Lookup Speed** | Fastest (checks only 1 line index).| Slower (checks all lines in parallel).| Moderate (checks lines in 1 set). |
+| **6. Hardware Cost** | Lowest. | Highest (needs CAM memory). | Moderate. |
+| **7. Replacement Rule**| Not needed. | Needed (LRU, FIFO, etc.). | Needed (LRU, FIFO, etc.). |
+| **8. Swapping (Thrashing)**| High (frequent cache line overwrites).| None. | Low. |
+| **9. Design Complexity**| Very simple. | Very complex. | Moderate. |
+| **10. Typical Use** | L1 cache (simple devices). | Translation Buffers (TLBs). | L1, L2, L3 in modern CPUs. |
 
 ---
 ---
