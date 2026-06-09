@@ -354,3 +354,24 @@ Carries are calculated directly from C0 and inputs:
       │    CPU    │       │  MEMORY   │       │I/O Devices│
       └───────────┘       └───────────┘       └───────────┘
 ```
+
+---
+
+### Differences Between Address, Data, and Control Bus (Write in Exam):
+
+*   **Direction of Signals**:
+    *   *Address Bus*: One-way only (from CPU to Memory or I/O).
+    *   *Data Bus*: Two-way (flows to and from the CPU).
+    *   *Control Bus*: Two-way (timing signals flow to and from components).
+*   **What they Carry**:
+    *   *Address Bus*: Carries target location address numbers.
+    *   *Data Bus*: Carries actual data values and instruction codes.
+    *   *Control Bus*: Carries control commands and timing signals.
+*   **Width (Line Count) Meaning**:
+    *   *Address Bus*: Size sets the maximum memory capacity (locations = 2^n).
+    *   *Data Bus*: Size sets the number of bits transferred at one time.
+    *   *Control Bus*: Size depends on CPU features and operations.
+*   **Examples in 8086**:
+    *   *Address Bus*: 20 lines (handles up to 1 MB).
+    *   *Data Bus*: 16 lines (transfers 2 bytes in one cycle).
+    *   *Control Bus*: Signals like MEMR̅, MEMW̅, READY, RESET.
