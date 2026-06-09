@@ -4,38 +4,59 @@
 
 ## Q6. Explain the Difference Between Write-Through and Write-Back Policies (6 Marks)
 
-### Short Definition & Core Concept:
-*   **The Cache Write Problem**: When the CPU writes or updates data, it changes it in the fast cache. We must choose when to update the slower main memory (RAM) to keep data matching.
-*   **Write-Through Policy**: Updates both the cache and the RAM at the same time on every single write.
-*   **Write-Back Policy**: Updates only the cache line immediately. RAM is updated later, only when that cache line is removed to make space.
+### Definitions:
+*   **Write-Through**: Data is written to cache and main memory simultaneously.
+*   **Write-Back**: Data is written only to cache and updated in main memory later.
+
+---
+
+### Core Theory (Write in Exam):
+
+*   **Write Buffer Concept**:
+    *   Writing to RAM is slow and can bottleneck the CPU.
+    *   Write-Through uses a Write Buffer to store pending RAM writes.
+    *   CPU writes to the buffer and continues work without waiting.
+*   **Dirty Bit Concept**:
+    *   Used in Write-Back to track cache modifications.
+    *   Dirty bit = 1: Cache line was changed; must write to RAM before removing.
+    *   Dirty bit = 0: Cache matches RAM; can be removed without writing.
 
 ---
 
 ### Comparison Table (Write in Exam):
 
-| Point / Feature | Write-Through Policy | Write-Back Policy |
+| Feature | Write-Through Policy | Write-Back Policy |
 | :--- | :--- | :--- |
-| **1. Update Timing** | Instant (on every single write). | Delayed (only when block is removed). |
-| **2. Write Speed** | Slower (runs at slow RAM speed). | Faster (runs at fast cache speed). |
-| **3. Bus Traffic** | High (every write uses the system bus). | Low (only block removal uses the bus). |
-| **4. CPU Stalls** | Yes (happens if write buffer gets full). | No (CPU never waits for slow RAM). |
-| **5. Dirty Bit** | Not required. | Required (tracks if cache block changed). |
-| **6. Design Complexity** | Simple. | Highly complex. |
-| **7. Crash Safety** | High (no data is lost on sudden crash). | Lower (unsaved cache changes are lost). |
-| **8. Multi-CPU Consistency** | Simple (other CPUs see RAM updates instantly).| Complex (needs consistency tracking). |
-| **9. Hardware Component** | Uses a Write Buffer. | Uses a Cache Controller. |
-| **10. Storage Overhead** | No extra bits needed. | Requires dirty bit per cache line. |
+| **1. Memory Update** | Updates RAM on every write. | Updates RAM on block replacement. |
+| **2. Write Operation** | Slower due to RAM access. | Faster due to cache access. |
+| **3. Memory Traffic** | Generates more bus traffic. | Generates less bus traffic. |
+| **4. Dirty Bit** | Dirty bit not required. | Dirty bit is required. |
+| **5. Data Consistency** | Cache and RAM always same. | Cache and RAM may differ. |
+| **6. Reliability** | Safer during power failure. | Risk of losing modified data. |
+| **7. Hardware Design** | Simple to implement. | More complex to implement. |
+| **8. Overall Performance**| Lower write performance. | Higher write performance. |
+| **9. Write Buffer** | Often needs a write buffer to avoid CPU stalls. | Not required for normal writes. |
+| **10. Multi-CPU Systems** | Easier to keep data matching across CPUs. | Harder to keep data matching across CPUs. |
 
 ---
 ---
 
 ## Q7. Compare the Three Cache Mapping Techniques: Direct, Associative, and Set-Associative (7 Marks)
 
-### Short Definition & Core Concept:
-*   **Cache Mapping**: Rules that define where a main memory block is placed inside the smaller cache memory.
-*   **Direct Mapping**: Each memory block maps to exactly one specific cache line.
+### Definitions:
+*   **Direct Mapping**: Each memory block maps to one fixed cache line.
 *   **Fully Associative Mapping**: A memory block can be placed in any cache line.
-*   **Set-Associative Mapping**: Cache is split into sets; block maps to a set, and can sit in any line within that set.
+*   **Set-Associative Mapping**: A memory block maps to a set and can occupy any line within that set.
+
+---
+
+### Core Theory (Write in Exam):
+
+*   **Address Fields Purpose**:
+    *   CPU splits the physical RAM address into fields to locate blocks inside the cache.
+    *   **Tag**: Stores block identity to verify if it is the correct memory location.
+    *   **Index / Set Index**: Tells the CPU which specific cache line or set to look in.
+    *   **Offset**: Selects the specific byte/word from the cached block.
 
 ---
 
@@ -51,18 +72,18 @@
 
 ### Comparison Table (Write in Exam):
 
-| Point / Feature | Direct Mapping | Fully Associative Mapping | Set-Associative Mapping |
+| Feature | Direct Mapping | Fully Associative Mapping | Set-Associative Mapping |
 | :--- | :--- | :--- | :--- |
-| **1. Block Location** | Only 1 fixed cache line. | Any line in the cache. | Any line within a specific set. |
-| **2. Address Fields** | Tag, Line Index, Word Offset. | Tag, Word Offset. | Tag, Set Index, Word Offset. |
-| **3. Tag Comparators**| Only 1 comparator. | N comparators (one for every line). | K comparators (one for each line in set). |
-| **4. Conflict Misses**| Highest (very frequent swaps). | Zero (no conflicts). | Low. |
-| **5. Lookup Speed** | Fastest (checks only 1 line index).| Slower (checks all lines in parallel).| Moderate (checks lines in 1 set). |
-| **6. Hardware Cost** | Lowest. | Highest (needs CAM memory). | Moderate. |
-| **7. Replacement Rule**| Not needed. | Needed (LRU, FIFO, etc.). | Needed (LRU, FIFO, etc.). |
-| **8. Swapping (Thrashing)**| High (frequent cache line overwrites).| None. | Low. |
-| **9. Design Complexity**| Very simple. | Very complex. | Moderate. |
-| **10. Typical Use** | L1 cache (simple devices). | Translation Buffers (TLBs). | L1, L2, L3 in modern CPUs. |
+| **1. Block Placement** | One fixed cache line. | Any cache line in cache. | Any line within a set. |
+| **2. Address Fields** | Tag, Index, Offset. | Tag and Offset only. | Tag, Set Index, Offset. |
+| **3. Tag Comparison** | One tag comparison. | Compare with all tags. | Compare within selected set. |
+| **4. Conflict Misses** | Highest conflict misses. | Almost no conflict misses. | Reduced conflict misses. |
+| **5. Access Speed** | Fastest cache access. | Slowest cache access. | Moderate cache access. |
+| **6. Hardware Cost** | Lowest hardware cost. | Highest hardware cost. | Moderate hardware cost. |
+| **7. Replacement Policy**| No replacement required. | Replacement policy required. | Replacement policy required. |
+| **8. Design Complexity** | Very simple design. | Very complex design. | Moderately complex design. |
+| **9. Cache Utilization** | Lower cache utilization. | Best cache utilization. | Good cache utilization. |
+| **10. Risk of Thrashing**| High risk (constant line swaps).| Zero risk (no index conflicts).| Low risk. |
 
 ---
 ---
