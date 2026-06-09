@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semester IV End-Sem Study Dashboard</title>
+  
+  <!-- Modern Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- marked.js CDN for compiling markdown answers dynamically -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- Sidebar Component -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <h1 class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="stroke: url(#logo-grad); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+          <defs>
+            <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="hsl(210, 100%, 66%)" />
+              <stop offset="100%" stop-color="hsl(250, 100%, 70%)" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span>End Sem 4</span>
+      </h1>
+      <div class="logo-subtitle">Preparation Hub</div>
+    </div>
+    
+    <!-- Subject Display -->
+    <div class="subject-selector">
+      <button class="subject-btn" id="subject-selector-btn">
+        <span>CO & Microprocessor</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Navigation list of Units -->
+    <nav class="nav-section">
+      <h2 class="section-label">Course Units</h2>
+      <ul class="nav-list" id="nav-list">
+        <!-- Rendered dynamically by app.js -->
+      </ul>
+    </nav>
+    
+    <!-- Overall Subject Progress -->
+    <div class="overall-progress-card">
+      <div class="progress-header">
+        <span>Overall Progress</span>
+        <span class="progress-pct" id="overall-progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="overall-progress-fill"></div>
+      </div>
+      
+      <!-- Status Counters -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-count not-started" id="count-not-started">0</div>
+          <div class="stat-label">Not Started</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-count learning" id="count-learning">0</div>
+          <div class="stat-label">Learning</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-count mastered" id="count-mastered">0</div>
+          <div class="stat-label">Mastered</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Header Component -->
+    <header class="main-header">
+      
+      <!-- Mobile hamburger toggle -->
+      <button class="menu-btn" id="menu-toggle-btn" onclick="toggleMobileSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      
+      <div class="header-title-area">
+        <h2 class="subject-title" id="header-subject-title">Computer Organization and Microprocessor</h2>
+        <div class="unit-subtitle" id="header-unit-title">Loading Unit Details...</div>
+      </div>
+      
+      <!-- Controls Panel (Search & Modes) -->
+      <div class="controls-area">
+        
+        <!-- Interactive Search -->
+        <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Search Q&As..." oninput="handleSearch(this.value)">
+        </div>
+        
+        <!-- Toggle Mode (Study / Flashcards) -->
+        <div class="mode-toggle-group">
+          <button class="mode-btn active" id="btn-mode-study" onclick="setMode('study')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Study
+          </button>
+          <button class="mode-btn" id="btn-mode-flash" onclick="setMode('flash')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 8h10M7 12h10M7 16h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Flashcards
+          </button>
+        </div>
+        
+      </div>
+    </header>
+    
+    <!-- Central Scrollable Viewport -->
+    <div class="scroll-container">
+      
+      <!-- Study Mode Layout (List of Cards) -->
+      <section class="qa-layout" id="qa-layout">
+        <div id="qa-list-container">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </section>
+      
+      <!-- Flashcards Mode Layout -->
+      <section class="flashcard-layout" id="flashcard-layout">
+        <div id="flashcard-inner-container">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+        
+        <!-- Navigation for Flashcards -->
+        <div class="fc-nav-controls">
+          <button class="fc-btn" id="fc-btn-prev" onclick="prevFlashcard()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:4px;">
+              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Previous
+          </button>
+          <span class="fc-progress-text" id="fc-progress">1 / 5</span>
+          <button class="fc-btn" id="fc-btn-next" onclick="nextFlashcard()">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-left:4px;">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+      
+    </div>
+  </main>
+
+  <!-- Load Subject Databases -->
+  <script src="data/co_mp.js"></script>
+  
+  <!-- Load App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
