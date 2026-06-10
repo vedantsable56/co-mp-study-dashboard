@@ -2,48 +2,24 @@
 
 ---
 
-## Q16. Explain and illustrate even and odd memory banks with diagram. (7 Marks)
+## Q16. Explain Even and Odd Memory Banks of 8086 (7 Marks)
 
-*   **Memory Banking**:
-    *   8086 has a 16-bit wide data bus.
-    *   Memory addresses are byte-addressable (8-bit).
-    *   To allow 16-bit word access in one cycle, memory is divided.
-    *   Split into Even Bank (512 KB) and Odd Bank (512 KB).
+### Introduction:
+*   8086 has a 16-bit data bus and 1 MB memory space.
+*   To access 16-bit data efficiently, memory is divided into Even Bank and Odd Bank.
 
 ---
 
-### Memory Banks Details (Write in Exam):
+### Even and Odd Banks:
 
-*   **Even Bank (Lower Bank)**:
-    *   Stores bytes at even addresses (00000H, 00002H, 00004H, ...).
-    *   Connected to lower data lines D0 - D7.
+*   **Even Bank**:
+    *   Stores bytes at even addresses (00000H, 00002H, etc.).
+    *   Connected to data lines D0–D7.
     *   Selected when address line A0 = 0.
-*   **Odd Bank (Upper Bank)**:
-    *   Stores bytes at odd addresses (00001H, 00003H, 00005H, ...).
-    *   Connected to upper data lines D8 - D15.
+*   **Odd Bank**:
+    *   Stores bytes at odd addresses (00001H, 00003H, etc.).
+    *   Connected to data lines D8–D15.
     *   Selected when control line BHE̅ = 0.
-
----
-
-### Detailed Access Scenarios:
-
-1.  **Read/Write Byte at Even Address**:
-    *   *Controls*: A0 = 0, BHE̅ = 1.
-    *   *Action*: Only Even Bank is active. Data transfers on D0 - D7.
-    *   *Cycle count*: 1 bus cycle.
-2.  **Read/Write Byte at Odd Address**:
-    *   *Controls*: A0 = 1, BHE̅ = 0.
-    *   *Action*: Only Odd Bank is active. Data transfers on D8 - D15.
-    *   *Cycle count*: 1 bus cycle.
-3.  **Read/Write Aligned Word (starts at Even Address)**:
-    *   *Controls*: A0 = 0, BHE̅ = 0.
-    *   *Action*: Both banks active. D0-D7 transfers even byte.
-    *   *Action*: D8-D15 transfers odd byte.
-    *   *Cycle count*: 1 bus cycle.
-4.  **Read/Write Unaligned Word (starts at Odd Address)**:
-    *   *Cycle 1*: Read odd byte via D8 - D15 (A0 = 1, BHE̅ = 0).
-    *   *Cycle 2*: Read even byte via D0 - D7 (A0 = 0, BHE̅ = 1).
-    *   *Consequence*: Speed penalty (requires 2 bus cycles).
 
 ---
 
@@ -54,7 +30,7 @@
                ┌─────────────────────────┐
                │    16-bit Data Bus       │
                │  D0-D7      D8-D15      │
-               └────┼────────────┬───────┘
+               └────┬────────────┬───────┘
                     │            │
             A0=0     │            │    BHE̅=0
           (select)   │            │   (select)
@@ -74,48 +50,68 @@
 
 ### Bank Selection Table:
 
-| BHE̅ | A0 | Operation | Active Data Bus Lines | Bus Cycles |
-| :---: | :---: | :--- | :---: | :---: |
-| **1** | **0** | Read/Write byte at even address | D0 - D7 | 1 |
-| **0** | **1** | Read/Write byte at odd address | D8 - D15 | 1 |
-| **0** | **0** | Read/Write word at even address | D0 - D15 (All) | 1 |
-| **1** | **1** | Idle | None | — |
+| BHE̅ | A0 | Operation |
+| :---: | :---: | :--- |
+| **1** | **0** | Even bank selected |
+| **0** | **1** | Odd bank selected |
+| **0** | **0** | Both banks selected |
+| **1** | **1** | No bank selected |
+
+---
+
+### Detailed Access Scenarios (Other Points):
+1.  **Read/Write Byte at Even Address**:
+    *   A0 = 0, BHE̅ = 1.
+    *   Uses data lines D0-D7.
+    *   Takes 1 bus cycle.
+2.  **Read/Write Byte at Odd Address**:
+    *   A0 = 1, BHE̅ = 0.
+    *   Uses data lines D8-D15.
+    *   Takes 1 bus cycle.
+3.  **Aligned Word (starts at Even Address)**:
+    *   A0 = 0, BHE̅ = 0.
+    *   Uses data lines D0-D15.
+    *   Takes 1 bus cycle.
+4.  **Unaligned Word (starts at Odd Address)**:
+    *   Takes 2 bus cycles (speed penalty).
+    *   *Cycle 1*: Reads odd byte via D8-D15.
+    *   *Cycle 2*: Reads even byte via D0-D7.
+
+---
+
+### Conclusion:
+*   Memory banking allows 8086 to access 16-bit words efficiently.
 
 ---
 ---
 
-## Q17. Draw and analyze read and write timing diagram of 8086. (7 Marks)
+## Q17. Read and Write Timing Diagram of 8086 (7 Marks)
 
-*   **Bus Cycle**: Sequence of signals for one read or write.
-*   **Time slots**: Basic cycle lasts 4 clock cycles (T1, T2, T3, T4).
-
----
-
-### Detailed Operations in Each T-State (Write in Exam):
-
-*   **T1 (Address Phase)**:
-    *   CPU puts address on AD0-AD15.
-    *   CPU puts status on A16/S3 - A19/S6.
-    *   ALE goes HIGH to save address.
-    *   M/IO̅ indicates memory or I/O access.
-    *   BHE̅ goes LOW if odd bank is used.
-*   **T2 (Bus Turnaround / Command Phase)**:
-    *   CPU removes address from AD0-AD15.
-    *   DEN̅ goes LOW to enable buffers.
-    *   DT/R̅ sets transfer direction.
-    *   *Read*: RD̅ goes LOW; CPU floats bus lines.
-    *   *Write*: WR̅ goes LOW; CPU drives data onto bus.
-*   **T3 (Data Phase)**:
-    *   CPU checks READY pin:
-        *   READY = HIGH: Move to T4.
-        *   READY = LOW: CPU inserts Wait state (Tw) for slow devices.
-*   **T4 (Termination Phase)**:
-    *   RD̅ or WR̅ returns to HIGH (inactive).
-    *   DEN̅ goes HIGH to turn off buffers.
+### Introduction:
+*   A bus cycle consists of four clock states (T-states): T1, T2, T3 and T4.
 
 ---
 
-### Timing Diagrams (Draw in Exam):
+### T-State Functions:
+
+*   **T1**:
+    *   Address is placed on the bus.
+    *   ALE (Address Latch Enable) becomes HIGH.
+*   **T2**:
+    *   Read or Write signal is activated.
+    *   Data transfer starts.
+*   **T3**:
+    *   Data transfer takes place.
+    *   Wait state (Tw) is inserted if READY = 0 (slow memory).
+*   **T4**:
+    *   Bus cycle ends.
+    *   Control signals become inactive.
+
+---
+
+### Read Cycle:
+*   RD̅ becomes LOW.
+*   Data is transferred from memory to the CPU.
 
 ```
   READ CYCLE:
@@ -133,8 +129,15 @@
                    ┌─────────────────────┐
  RD̅   ─────────────┘                     └─────────────
        (HIGH)         (LOW = Active)        (HIGH)
+```
 
+---
 
+### Write Cycle:
+*   WR̅ becomes LOW.
+*   Data is transferred from the CPU to memory.
+
+```
   WRITE CYCLE:
           T1        T2        T3        T4
       ──┬───────────┬──────────────────────┬───────────
@@ -149,120 +152,97 @@
 ---
 ---
 
-## Q18. Compare Memory-Mapped I/O and I/O-Mapped I/O. (8 Marks)
+## Q18. Compare Memory-Mapped I/O and I/O-Mapped I/O (8 Marks)
 
----
-
-### Key Concepts (Write in Exam):
-*   **Memory-Mapped I/O**:
-    *   I/O registers share memory address space.
-    *   CPU treats I/O like normal memory locations.
-    *   No special commands are needed.
-*   **I/O-Mapped I/O (Isolated I/O)**:
-    *   I/O has separate 64 KB address space.
-    *   Accessed only with IN and OUT commands.
-
----
-
-### Detailed Comparison Table:
+### Comparison Table:
 
 | Feature | Memory-Mapped I/O | I/O-Mapped I/O |
 | :--- | :--- | :--- |
-| **Address Space** | Shares memory space (1 MB) | Separate I/O space (64 KB) |
-| **Control Signals** | MEMR̅ / MEMW̅ | IOR̅ / IOW̅ |
-| **Instructions** | Any memory instruction (`MOV`, `ADD`) | Only `IN` and `OUT` |
-| **Status Pin (M/IO̅)**| Driven HIGH (1) | Driven LOW (0) |
-| **Register Limit** | Uses any general register | Must use AL or AX |
-| **Address Decoding** | Requires 20-bit decoding | Requires 16-bit decoding |
-| **RAM Space Impact** | Reduces RAM address range | No impact on RAM space |
-| **Hardware** | Higher wire decoding complexity | Lower complexity |
+| **Address Space** | Shares memory space. | Separate I/O space. |
+| **Address Range** | 1 MB. | 64 KB. |
+| **Instructions Used** | Any memory instruction (like `MOV`). | `IN` and `OUT` only. |
+| **Registers Used** | Any register. | `AL` or `AX` only. |
+| **Memory Impact** | Reduces memory space. | No effect on memory. |
+| **Hardware** | Complex. | Simple. |
+| **Speed** | Faster. | Slower. |
+| **Flexibility** | More. | Less. |
+
+---
+
+### Conclusion:
+*   Memory-mapped I/O provides flexibility, while I/O-mapped I/O saves memory space.
 
 ---
 ---
 
-## Q19. Given CS = 2000H and IP = 1234H, calculate the physical address. (4 Marks)
+## Q19. Calculate Physical Address (4 Marks)
 
-*   **Segmented Memory Calculation**:
-    *   Shift segment register left by 4 bits (multiply by 10H).
-    *   Add the 16-bit offset value.
-    *   Formula:
-        Physical Address = (Segment Register x 10H) + Offset Register
+### Formula:
+Physical Address = (Segment Address x 10H) + Offset Address
 
 ---
 
-### Step-by-Step Calculations (Write in Exam):
+### Example Calculation:
 
-*   **Problem 1: Given CS = 2000H, IP = 1234H**
-    1.  Shift CS:
+*   **Given**:
+    *   Segment Address (CS) = **2000H**
+    *   Offset Address (IP) = **1234H**
+*   **Calculation**:
+    1.  Multiply Segment Address by 10H:
         2000H x 10H = 20000H
-    2.  Add IP:
+    2.  Add Offset Address:
         20000H + 1234H = 21234H
-    3.  *Answer*: Physical Address = 21234H
-*   **Problem 2: Given DS = 1500H, SI = 0200H**
-    1.  Shift DS:
-        1500H x 10H = 15000H
-    2.  Add SI:
-        15000H + 0200H = 15200H
-    3.  *Answer*: Physical Address = 15200H
-*   **Problem 3: Given SS = 3000H, SP = 0100H**
-    1.  Shift SS:
-        3000H x 10H = 30000H
-    2.  Add SP:
-        30000H + 0100H = 30100H
-    3.  *Answer*: Physical Address = 30100H
+*   **Answer**:
+    *   Physical Address = **21234H**
 
 ---
 
-### Segmented Memory Benefits:
-*   Allows 16-bit CPU to access 1 MB memory.
-*   Enables dynamic code relocatability (moving code in RAM).
-*   Partitions memory into distinct sections (Code, Data, Stack).
+### Additional Revision Examples:
+*   *Given*: DS = 1500H, SI = 0200H
+    *   Physical Address = (1500H x 10H) + 0200H = 15200H
+*   *Given*: SS = 3000H, SP = 0100H
+    *   Physical Address = (3000H x 10H) + 0100H = 30100H
 
 ---
 ---
 
-## Q20. Explain the interrupt handling mechanism in 8086 and the Interrupt Vector Table (IVT). (6 Marks)
+## Q20. Explain Interrupt Handling Mechanism and IVT (6 Marks)
 
-*   **Interrupt**:
-    *   Signal that pauses the current program.
-    *   CPU runs an Interrupt Service Routine (ISR).
-    *   Main program resumes after ISR completes.
-*   **Interrupt Classes**:
-    *   *Hardware*: Pins like INTR or NMI.
-    *   *Software*: Commands like `INT n`.
+### Interrupt:
+*   An interrupt is a signal that temporarily stops the current program and transfers control to an Interrupt Service Routine (ISR).
 
 ---
 
-### 1. Interrupt Handling Steps (Write in Exam):
-
-1.  Complete current instruction.
-2.  Push **FLAGS** register onto stack.
-3.  Clear **IF** and **TF** flags to block interrupts during ISR.
-4.  Push **CS** segment register onto stack.
-5.  Push **IP** offset register onto stack.
-6.  Get vector from IVT:
-    IVT Address = Interrupt Type (n) x 4
-7.  Load new **IP** and **CS** from table.
-8.  Run ISR. The ISR must end with `IRET` to pop IP, CS, and FLAGS back.
+### Interrupt Handling Steps:
+1.  Complete the current instruction.
+2.  Push **FLAGS** onto stack.
+3.  Push **CS** onto stack.
+4.  Push **IP** onto stack.
+5.  Fetch ISR address from the Interrupt Vector Table (IVT).
+6.  Execute the ISR.
+7.  Return to the main program using the `IRET` instruction.
 
 ---
 
-### 2. Interrupt Vector Table (IVT) (Write in Exam):
+### Interrupt Vector Table (IVT):
 
-*   **Location**: Address 00000H to 003FFH (first 1024 bytes).
-*   **Size**: Holds 256 vector addresses.
-*   **Fields**: Each vector is 4 bytes (2 bytes IP, 2 bytes CS).
+| Feature | Value |
+| :--- | :--- |
+| **Location** | 00000H – 003FFH |
+| **Size** | 1 KB (first 1024 bytes of memory) |
+| **Entries** | 256 interrupt vectors |
+| **Entry Size** | 4 Bytes (2 bytes for IP, 2 bytes for CS) |
 
 ---
 
-### Dedicated Interrupt Types:
+### Dedicated Interrupt Types (Other Theory):
+*   **Type 0**: Divide by Zero error.
+*   **Type 1**: Single Step debugging.
+*   **Type 2**: NMI (Non-Maskable pin).
+*   **Type 3**: Breakpoint.
+*   **Type 4**: Overflow.
 
-| Interrupt Type | Address Range | Purpose |
-| :--- | :--- | :--- |
-| **Type 0** | 00000H - 00003H | Divide by Zero error |
-| **Type 1** | 00004H - 00007H | Single Step debugging |
-| **Type 2** | 00008H - 0000BH | NMI (Non-Maskable pin) |
-| **Type 3** | 0000CH - 0000FH | Breakpoint instruction |
-| **Type 4** | 00010H - 00013H | Overflow exception |
-| **Type 5–31** | 00014H - 0007FH | Intel reserved hardware |
-| **Type 32–255** | 00080H - 003FFH | User-defined software interrupts |
+---
+
+### Conclusion:
+*   IVT stores addresses of interrupt service routines used by 8086.
