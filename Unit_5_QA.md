@@ -4,17 +4,24 @@
 
 ## Q21. Closely Coupled and Loosely Coupled Multiprocessor Systems (6 Marks)
 
-### Closely Coupled System:
-*   Processors share common main memory.
-*   Runs a single operating system.
-*   Fast communication speeds.
-*   Low scalability.
+### Core Theory (Write in Exam):
+*   **Bus Arbitration**: In closely coupled systems, CPUs share a single bus. An arbitrator decides which CPU gets bus access (using daisy chaining or polling) to prevent bus conflicts.
+*   **Interconnection Networks**: Loosely coupled systems connect nodes using networks (like mesh, ring, or hypercube topologies) to route message packets between nodes.
 
-### Loosely Coupled System:
-*   Each processor has its own local memory.
-*   Communication happens through message passing.
-*   High scalability.
-*   Better fault tolerance.
+---
+
+### Key Concepts:
+
+*   **Closely Coupled System**:
+    *   Processors share a common centralized main memory.
+    *   CPUs communicate via shared memory variables.
+    *   Runs a single operating system.
+    *   Fast communication speeds but low scalability.
+*   **Loosely Coupled System**:
+    *   Each processor has its own private memory and I/O.
+    *   CPUs communicate by passing message packets.
+    *   Each processor runs its own copy of the OS.
+    *   High scalability and better fault tolerance.
 
 ---
 
@@ -39,11 +46,11 @@
 
 | Feature | Closely Coupled | Loosely Coupled |
 | :--- | :--- | :--- |
-| **Memory** | Shared. | Local. |
-| **Communication** | Shared Memory. | Message Passing. |
-| **OS** | Single. | Multiple. |
-| **Scalability** | Low. | High. |
-| **Reliability** | Lower. | Higher. |
+| **Memory** | Shared centralized memory pool. | Private local memory for each CPU. |
+| **Communication** | Through shared variables in common memory. | Through message passing over a network. |
+| **OS** | Single OS controls all CPUs. | Each CPU runs its own local OS copy. |
+| **Scalability** | Low due to bus and memory bottlenecks. | High since nodes are independent. |
+| **Reliability** | Lower (shared memory failure crashes system). | Higher (node failure does not affect others). |
 
 ---
 ---
@@ -60,7 +67,17 @@
 *   Shared memory.
 *   Shared I/O devices.
 *   Single operating system.
-*   Equal access rights to resources.
+*   Equal access rights to resources (no master-slave setup).
+
+---
+
+### Core Theory of Cache Consistency (Write in Exam):
+*   **MESI Protocol**: Keeps data matching across private CPU caches using 4 states:
+    *   *M (Modified)*: Cache line is changed; RAM holds old data.
+    *   *E (Exclusive)*: Cache matches RAM and exists only in this cache.
+    *   *S (Shared)*: Cache matches RAM and is present in other caches.
+    *   *I (Invalid)*: Cache data is old and must be re-read.
+*   **Bus Snooping**: Cache controllers watch the shared bus to invalidate or update their own lines when another CPU writes to a shared location.
 
 ---
 
@@ -87,16 +104,10 @@
 ---
 
 ### Advantages:
-*   Higher performance.
-*   Better resource utilization.
-*   Increased reliability.
-*   Supports parallel processing.
-
----
-
-### Cache Consistency Concept (Other Theory):
-*   Processors have private caches, which can lead to mismatching data.
-*   MESI Protocol is used to keep data consistent (Modified, Exclusive, Shared, Invalid).
+*   **Higher performance**: Parallel execution of multiple threads.
+*   **Better resource utilization**: OS schedules tasks dynamically on idle CPUs.
+*   **Increased reliability**: If one CPU fails, other CPUs keep running.
+*   **Parallel processing**: Speeds up heavy scientific and database tasks.
 
 ---
 ---
@@ -104,24 +115,31 @@
 ## Q23. Explain Flynn's Taxonomy (7 Marks)
 
 ### Definition:
-*   Flynn's Taxonomy classifies computer systems based on instruction streams and data streams.
+*   Flynn's Taxonomy classifies computer systems based on the number of instruction streams and data streams active in the processor.
 
 ---
 
-### Types:
+### Core Theory of Flynn's Elements (Write in Exam):
+*   **Control Unit (CU)**: Fetches and decodes instructions.
+*   **Processing Element (PE)**: Performs arithmetic and logic operations.
+*   **Memory Module (MM)**: Stores instructions and active data.
+
+---
+
+### The Four Classes:
 
 *   **SISD (Single Instruction Single Data)**:
-    *   Executes 1 instruction on 1 data stream at a time.
-    *   Example: Single-core computer.
+    *   1 instruction stream processes 1 data stream sequentially.
+    *   Example: Older single-core PCs.
 *   **SIMD (Single Instruction Multiple Data)**:
-    *   Executes 1 instruction on multiple data streams.
-    *   Example: GPU.
+    *   1 control unit broadcasts 1 instruction to multiple execution units processing different data.
+    *   Example: GPUs.
 *   **MISD (Multiple Instruction Single Data)**:
-    *   Executes multiple instructions on the same data.
-    *   Example: Fault-tolerant flight systems.
+    *   Multiple execution units process the same data using different instructions.
+    *   Example: Redundant backup flight computers.
 *   **MIMD (Multiple Instruction Multiple Data)**:
-    *   Executes multiple instructions on multiple data streams.
-    *   Example: Multi-core processors.
+    *   Multiple independent CPUs run different instructions on different data.
+    *   Example: Modern multi-core processors.
 
 ---
 
@@ -129,15 +147,21 @@
 
 | Type | Instruction Stream | Data Stream | Example |
 | :--- | :--- | :--- | :--- |
-| **SISD** | Single | Single | Single-core PC |
-| **SIMD** | Single | Multiple | GPU |
-| **MISD** | Multiple | Single | Fault-tolerant systems |
-| **MIMD** | Multiple | Multiple | Multi-core CPU |
+| **SISD** | Single instruction stream. | Single data stream. | Single-core PC. |
+| **SIMD** | Single instruction stream. | Multiple data streams. | GPU (Graphics Processing Unit). |
+| **MISD** | Multiple instruction streams. | Single data stream. | Redundant flight systems. |
+| **MIMD** | Multiple instruction streams. | Multiple data streams. | Multi-core CPU. |
 
 ---
 ---
 
 ## Q24. Compare UMA and NUMA Architectures (8 Marks)
+
+### Core Theory (Write in Exam):
+*   **Data Locality**: NUMA performance depends on placing program data in the physical RAM node closest to the executing CPU to minimize access delays.
+*   **Directory Coherence**: NUMA systems use a directory protocol to keep track of block states in private caches because bus snooping does not scale across networks.
+
+---
 
 ### Definitions:
 *   **UMA**: Uniform Memory Access architecture where all processors access memory with equal delay.
@@ -149,35 +173,41 @@
 
 | Feature | UMA | NUMA |
 | :--- | :--- | :--- |
-| **Memory Organization** | Centralized | Distributed |
-| **Access Time** | Uniform | Non-uniform |
-| **Scalability** | Low | High |
-| **Performance** | Moderate | Better |
-| **Interconnection** | Shared Bus | High-Speed Network |
-| **Complexity** | Low | High |
+| **Memory Organization** | Centralized (one memory pool for all). | Distributed (RAM physically next to each CPU). |
+| **Access Time** | Uniform (same delay for all addresses). | Non-uniform (local RAM is fast, remote is slow). |
+| **Scalability** | Low (usually limited to < 32 CPUs). | High (can scale to thousands of CPUs). |
+| **Performance** | Moderate (bottlenecks on shared bus). | Better (high local memory bandwidth). |
+| **Interconnection** | Shared system bus or crossbar. | High-speed interconnection networks. |
+| **Complexity** | Low hardware design complexity. | High design and programming complexity. |
 
 ---
 
 ### Conclusion:
-*   NUMA offers better scalability, while UMA is simpler to implement.
+*   NUMA offers better scalability for massive server systems, while UMA is simpler to implement.
 
 ---
 ---
 
 ## Q25. Compare RISC and CISC Architectures (7 Marks)
 
+### Core Theory (Write in Exam):
+*   **Load-Store Architecture**: In RISC, only `LOAD` and `STORE` instructions access memory. All arithmetic operations must take place between registers.
+*   **Microprogramming**: CISC uses a microprogram ROM to break down complex instructions into a sequence of simple micro-operations inside the CPU.
+
+---
+
 ### Comparison Table:
 
 | Feature | RISC | CISC |
 | :--- | :--- | :--- |
-| **Full Form** | Reduced Instruction Set Computer | Complex Instruction Set Computer |
-| **Instruction Set** | Small | Large |
-| **Instruction Length** | Fixed | Variable |
-| **Execution Time** | Faster | Slower |
-| **Registers** | More | Fewer |
-| **Control Unit** | Hardwired | Microprogrammed |
-| **Pipelining** | Easy | Difficult |
-| **Examples** | ARM, RISC-V | Intel x86 |
+| **Full Form** | Reduced Instruction Set Computer. | Complex Instruction Set Computer. |
+| **Instruction Set** | Small set of simple, single-cycle instructions. | Large set of complex, multi-cycle instructions. |
+| **Instruction Length** | Fixed size (typically 32-bit) for easy decoding. | Variable size (1 to 15 bytes) requiring complex decoders. |
+| **Execution Time** | Faster (most instructions run in 1 clock cycle). | Slower (instructions take multiple clock cycles). |
+| **Registers** | Large register file (typically 32+ registers). | Fewer registers (typically 8 to 16 general registers). |
+| **Control Unit** | Hardwired using fast combinational logic gates. | Microprogrammed using complex microcode ROM. |
+| **Pipelining** | Easy and highly efficient due to fixed size. | Difficult due to variable lengths and execution times. |
+| **Examples** | ARM (mobile chips), RISC-V. | Intel x86, AMD. |
 
 ---
 
