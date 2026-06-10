@@ -131,14 +131,21 @@
     *   *Cons*: Slowest writes due to double parity math.
     *   *Min. Disks*: 4
 
----
-
-### Other RAID Levels (Briefly Mention in Exam):
-*   **RAID 2**: Bit-level striping with Hamming code parity.
-*   **RAID 3**: Byte-level striping with a single parity disk.
-*   **RAID 4**: Block-level striping with a single parity disk.
-
----
+*   **RAID 2 (Hamming Code ECC)**:
+    *   *Data distribution*: Striped at the bit level. Uses Hamming code for error correction.
+    *   *Pros*: Detects and fixes single-bit errors automatically.
+    *   *Cons*: Highly expensive. Requires multiple dedicated parity disks.
+    *   *Min. Disks*: 3 (typically requires more, e.g. 4 data + 3 parity).
+*   **RAID 3 (Byte-level Striping)**:
+    *   *Data distribution*: Striped at the byte level. Uses a single dedicated parity disk.
+    *   *Pros*: Very fast transfer rates for large sequential files.
+    *   *Cons*: Dedicated parity disk creates a write speed bottleneck.
+    *   *Min. Disks*: 3
+*   **RAID 4 (Block-level Striping)**:
+    *   *Data distribution*: Striped at the block level. Uses a single dedicated parity disk.
+    *   *Pros*: Fast read speeds. Blocks can be read independently.
+    *   *Cons*: Write speed is limited by the single parity disk bottleneck.
+    *   *Min. Disks*: 3
 
 ### Diagrams (Draw in Exam):
 
@@ -167,10 +174,13 @@
 
 | Level | Strategy | Fault Tolerance | Usable Space | Performance |
 | :--- | :--- | :--- | :---: | :--- |
-| **RAID 0** | Striping | 0 disk failures | 100% | High Read, High Write |
+| **RAID 0** | Striping (Block) | 0 disk failures | 100% | High Read, High Write |
 | **RAID 1** | Mirroring | 1 disk failure | 50% | High Read, Normal Write |
-| **RAID 5** | Distributed Parity | 1 disk failure | (N-1)/N | High Read, Slow Write |
-| **RAID 6** | Dual Parity | 2 disk failures | (N-2)/N | High Read, Slower Write |
+| **RAID 2** | Striping (Bit) + Hamming ECC | 1 disk failure | Variable (e.g. 4/7) | High Read, Slower Write |
+| **RAID 3** | Striping (Byte) + Dedicated Parity | 1 disk failure | (N-1)/N | Fast Sequential Read/Write, Slow Random |
+| **RAID 4** | Striping (Block) + Dedicated Parity | 1 disk failure | (N-1)/N | High Read, Slow Write bottleneck |
+| **RAID 5** | Striping (Block) + Distributed Parity | 1 disk failure | (N-1)/N | High Read, Slow Write |
+| **RAID 6** | Striping (Block) + Dual Parity | 2 disk failures | (N-2)/N | High Read, Slower Write |
 
 ---
 ---
