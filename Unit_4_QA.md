@@ -5,7 +5,7 @@
 ## Q16. Explain Even and Odd Memory Banks of 8086 (7 Marks)
 
 ### Definition
-The 8086 microprocessor features a 20-bit address bus and a 16-bit data bus, allowing it to address up to 1 MB of physical memory. To enable 16-bit word access in a single bus cycle while maintaining byte-addressability, the memory is physically divided into two parallel blocks of 512 KB: the Even Memory Bank (Lower Bank) and the Odd Memory Bank (Upper Bank).
+The 8086 memory is split into Even and Odd Banks of 512 KB each to support both 8-bit byte access and 16-bit word access in a single cycle.
 
 ### Diagram
 ```
@@ -21,78 +21,48 @@ The 8086 microprocessor features a 20-bit address bus and a 16-bit data bus, all
           ┌──────────────┐ ┌──────────────┐
           │  EVEN BANK   │ │  ODD BANK    │
           │ (Lower Bank) │ │ (Upper Bank) │
-          │              │ │              │
-          │ Addr 00000H  │ │ Addr 00001H  │
-          │ Addr 00002H  │ │ Addr 00003H  │
-          │     ...      │ │     ...      │
-          │  512 KB      │ │  512 KB      │
           └──────────────┘ └──────────────┘
 ```
 
-### Components and Functions
-*   Even Memory Bank (Lower Bank): Stores all data bytes located at even physical addresses (e.g., 00000H, 00002H, etc.). It is connected directly to the lower half of the CPU data bus, lines D0–D7, and is enabled when address line A0 is driven low (A0 = 0).
-*   Odd Memory Bank (Upper Bank): Stores all data bytes located at odd physical addresses (e.g., 00001H, 00003H, etc.). It is connected to the upper half of the data bus, lines D8–D15, and is enabled when the active-low control signal BHE̅ (Bus High Enable) is driven low (BHE̅ = 0).
-*   Address Line A0 Pin: Acts as the hardware chip-select signal for the Even Bank. When the CPU executes an operation at an even address, A0 is driven low, enabling data transfer over lines D0–D7.
-*   BHE̅ (Bus High Enable) Pin: Acts as the hardware chip-select signal for the Odd Bank. When driven low, it enables the data transceivers for the upper data bus lines (D8–D15), allowing byte access to odd memory locations.
+### Components
+*   **Even Bank (Lower Bank)** : Stores bytes at even physical addresses and connects to lower data lines D0–D7.
+*   **Odd Bank (Upper Bank)** : Stores bytes at odd physical addresses and connects to upper data lines D8–D15.
+*   **Address Line A0** : Acts as the hardware chip-select signal for the Even Memory Bank (active low).
+*   **BHE̅ Pin (Bus High Enable)** : Acts as the hardware chip-select signal for the Odd Memory Bank (active low).
 
-### Working of Memory Banks
-The CPU coordinates A0 and BHE̅ to perform three types of memory accesses:
-1. **Aligned Word Access (Single Bus Cycle)**: Occurs when the CPU reads or writes a 16-bit word starting at an even memory address (e.g., 2000H). The CPU drives A0 = 0 and BHE̅ = 0 simultaneously, activating both banks. The lower byte at 2000H is read over D0–D7, and the upper byte at 2001H is read over D8–D15 in one cycle.
-2. **Unaligned Word Access (Two Bus Cycles)**: Occurs when the CPU accesses a 16-bit word starting at an odd address (e.g., 2001H). 
-   * In *Cycle 1*, the CPU reads the odd byte at 2001H by setting A0 = 1 and BHE̅ = 0, transferring the byte over D8–D15.
-   * In *Cycle 2*, the CPU increments the address to the next even location 2002H, setting A0 = 0 and BHE̅ = 1 to transfer the remaining byte over D0–D7.
-3. **Byte Access**: For an even byte address, the CPU sets A0 = 0 and BHE̅ = 1, transferring data over D0–D7. For an odd byte address, it sets A0 = 1 and BHE̅ = 0, transferring data over D8–D15.
-
-### Advantages / Features
-*   **16-Bit Parallel Access**: Enables fetching a full 16-bit word in a single bus cycle, doubling the data transfer rate compared to 8-bit memory designs.
-*   **Byte-Addressable Space**: Maintains backward compatibility with 8-bit peripherals by allowing individual byte transfers over D0–D7 or D8–D15.
+### Working
+*   Aligned word access reads both banks simultaneously by driving A0 = 0 and BHE̅ = 0.
+*   Bytes at even addresses are read by driving A0 = 0 and BHE̅ = 1 over D0–D7 lines.
+*   Bytes at odd addresses are read by driving A0 = 1 and BHE̅ = 0 over D8–D15 lines.
+*   Unaligned word access at odd addresses requires two successive bus cycles to complete.
+*   Cycle 1 of unaligned access reads the odd byte, and Cycle 2 reads the next even byte.
 
 ---
 ---
 
 ## Q17. Read and Write Timing Diagram of 8086 (7 Marks)
 
-### Definition / Introduction
-A bus cycle is the sequence of events performed by the 8086 processor to read or write data to/from external memory or I/O devices. One basic bus cycle consists of four clock periods (T-states): T1, T2, T3, and T4, which coordinate address latching, data direction control, and read/write operations.
+### Definition
+A bus cycle defines the timing phases used by the 8086 CPU to read or write memory, consisting of T1, T2, T3, and T4 clock periods.
 
-### Diagrams
+### Diagram
 ```
-  READ CYCLE:
-          T1        T2        T3        T4
-       ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐
- CLK   │  │  │  │  │  │  │  │  │  │  │  │  │  │  │  │
-     ──┘  └──┘  └──┘  └──┘  └──┘  └──┘  └──┘  └──┘  ───
-       ┌─────┐
- ALE   │     │
-     ──┘     └─────────────────────────────────────────
-     ──┬───────────┬──────────────────────┬────────────
- AD   │  ADDRESS  │◄──── DATA IN ────────│
- 0-15 │ (A0-A15)  │  (from memory)       │
-     ──┴───────────┴──────────────────────┴────────────
-                   ┌─────────────────────┐
- RD̅   ─────────────┘                     └─────────────
-       (HIGH)         (LOW = Active)        (HIGH)
-
-  WRITE CYCLE:
-          T1        T2        T3        T4
-      ──┬───────────┬──────────────────────┬───────────
- AD   │  ADDRESS  │◄── DATA OUT ─────────│
- 0-15 │ (A0-A15)  │ (from CPU to memory) │
-      ──┴───────────┴──────────────────────┴───────────
-                   ┌─────────────────────┐
- WR̅   ─────────────┘                     └─────────────
-       (HIGH)         (LOW = Active)        (HIGH)
+CLK  _┌─┐_┌─┐_┌─┐_┌─┐_
+ALE  __┌─┐___________
+AD   __Address__Data_
 ```
 
-### Detailed Explanation of T-States
-*   **State T1 (Address Phase)**: The CPU places the 20-bit physical address on the multiplexed AD0–AD15 and status lines. It drives the ALE (Address Latch Enable) signal high to latch the address into external registers, and configures the M/IO̅ and DT/R̅ signals to define the cycle type and data direction.
-*   **State T2 (Bus Turnaround/Control)**: The ALE signal goes low to lock the address in external latches. For read cycles, the multiplexed bus lines are put into a high-impedance state to allow the memory device to drive the bus. For write cycles, the CPU drives the data onto the bus lines. The appropriate control signal (RD̅ or WR̅) and DEN̅ are driven low to enable the data transceivers.
-*   **State T3 (Data Phase)**: The CPU reads the byte/word from the data bus (during read cycles) or holds the data stable (during write cycles). At the start of T3, the CPU samples the READY pin; if READY is low, the CPU inserts Wait States (Tw) between T3 and T4, holding all signals active until READY goes high.
-*   **State T4 (Termination Phase)**: The control signals (RD̅ or WR̅) and DEN̅ are driven high, disabling the data transceivers. The CPU stops driving the data bus (during write cycles) or stops reading the bus (during read cycles), returning the AD0–AD15 lines to a high-impedance state.
+### Address Phase and Control Signal Activation
+*   **State T1 (Address Phase)**: CPU places physical address on AD0–AD15 and pulses ALE high to latch the address.
+*   **State T2 (Bus Turnaround)**: Bus goes high-impedance (read) or drives data (write). RD̅/WR̅ and DEN̅ go low.
 
-### Advantages / Features
-*   **Supports Slow Peripherals**: Uses the READY pin to dynamically insert wait states (Tw) when accessing slow memory or I/O devices.
-*   **Bus Isolation**: Uses the DEN̅ signal to isolate the CPU's internal data bus from the system bus, preventing collisions during address phases.
+### Data Transfer and Completion
+*   **State T3 (Data Transfer)**: CPU reads or writes data bits and samples the READY pin to check for slow devices.
+*   **State T4 (Bus Cycle End)**: Control signals (RD̅/WR̅) and DEN̅ return high to disconnect transceivers.
+
+### Features
+*   **Wait States**: Introduces Tw cycles if READY is low to allow slow devices to respond.
+*   **Data Bus Safety**: Uses DEN̅ and DT/R̅ to enable transceivers and coordinate data direction.
 
 ---
 ---
@@ -101,90 +71,62 @@ A bus cycle is the sequence of events performed by the 8086 processor to read or
 
 | Comparison Parameter | Memory-Mapped I/O | I/O-Mapped I/O |
 | :--- | :--- | :--- |
-| **1. Address Space Partition** | Shares the same physical address space as system RAM. | Occupies a completely separate, isolated address space. |
-| **2. Maximum Port Capacity** | Limited only by total system RAM (up to 1 MB in 8086). | Restricted to a dedicated range of 64 KB (65,536 ports). |
-| **3. Control Signal Select** | Relies on memory control signals like MEMR̅ and MEMW̅. | Uses specialized I/O control signals via the M/IO̅ line. |
-| **4. Instruction Set Support** | Can use any memory reference instructions (e.g., `MOV`, `ADD`). | Restricted to specialized input/output instructions (`IN`/`OUT`). |
-| **5. Register Access** | Allows transferring port data to and from any CPU register. | Restricts data transfers strictly to the accumulator (AL/AX). |
-| **6. Hardware Complexity** | Requires complex decoders to detect 20-bit memory addresses. | Uses simple, cheaper decoders to decode 16-bit I/O addresses. |
-| **7. Transfer Speed** | Faster due to memory-access optimizations. | Slower due to dedicated instruction execution overhead. |
-| **8. Memory Space Penalty** | Reduces available RAM space by reserving addresses for ports. | Preserves the entire 1 MB address space for system RAM. |
+| **1. Address Space** | Shares address space with system RAM. | Occupies separate I/O address space. |
+| **2. Max Port Range** | Up to 1 MB (same limit as RAM). | Limited to a range of 64 KB. |
+| **3. Control Signals** | Relies on memory signals (MEMR̅/MEMW̅). | Uses I/O control signals (M/IO̅). |
+| **4. Instructions** | Can use any memory reference command. | Restricted to IN and OUT instructions. |
+| **5. Registers** | Allows transfer with any CPU register. | Restricts data transfers to AL or AX. |
+| **6. Decoder Complexity**| High complexity (decodes 20-bit address). | Low complexity (decodes 16-bit address). |
+| **7. Access Speed** | Faster due to memory instructions. | Slower due to port control instructions. |
+| **8. Memory Penalty** | Reduces RAM space reserved for ports. | Preserves entire memory space for RAM. |
 
 ---
 ---
 
 ## Q19. Calculate Physical Address (4 Marks)
 
-### Introduction / Definition
-The 8086 microprocessor uses a segmented memory model to generate 20-bit physical addresses using 16-bit registers. The physical memory is divided into logical segments of 64 KB, and the physical address is calculated by combining a 16-bit Segment Address and a 16-bit Offset Address.
+### Definition
+The 8086 shifts the segment address left by 4 bits and adds the offset address to generate a 20-bit physical address.
 
 ### Formula
 Physical Address = (Segment Address · 10H) + Offset Address
 
-### Detailed Step-by-Step Examples
-*   Code Segment Calculation (CS:IP):
-    *   *Parameters*: Segment CS = `2000H`, Offset IP = `1234H`.
-    *   *Calculation*: The CPU shifts the segment address left by 4 bits (equivalent to multiplying by 10H) to obtain `20000H`. It then adds the offset address `1234H`.
-    *   *Step 1*: 2000H · 10H = 20000H
-    *   *Step 2*: 20000H + 1234H = 21234H
-    *   *Result*: Physical Address = `21234H`.
-*   Data Segment Calculation (DS:SI):
-    *   *Parameters*: Segment DS = `1500H`, Offset SI = `0200H`.
-    *   *Calculation*: The CPU shifts the data segment base to obtain `15000H` and adds the source index offset `0200H`.
-    *   *Step 1*: 1500H · 10H = 15000H
-    *   *Step 2*: 15000H + 0200H = 15200H
-    *   *Result*: Physical Address = `15200H`.
-*   Stack Segment Calculation (SS:SP):
-    *   *Parameters*: Segment SS = `3000H`, Offset SP = `0100H`.
-    *   *Calculation*: The CPU shifts the stack segment base to obtain `30000H` and adds the stack pointer offset `0100H`.
-    *   *Step 1*: 3000H · 10H = 30000H
-    *   *Step 2*: 30000H + 0100H = 30100H
-    *   *Result*: Physical Address = `30100H`.
-*   Extra Segment Calculation (ES:DI):
-    *   *Parameters*: Segment ES = `4000H`, Offset DI = `00A0H`.
-    *   *Calculation*: The CPU shifts the extra segment base to obtain `40000H` and adds the destination index offset `00A0H`.
-    *   *Step 1*: 4000H · 10H = 40000H
-    *   *Step 2*: 40000H + 00A0H = 400A0H
-    *   *Result*: Physical Address = `400A0H`.
-
-### Advantages / Features
-*   **Enables 1 MB Addressing**: Allows a processor with 16-bit internal registers to generate 20-bit addresses for a 1 MB physical memory space.
-*   **Code Relocatability**: Programs can be moved to different physical memory areas by changing the segment base registers without modifying offsets.
+### Examples
+*   **Code Segment Calculation (CS:IP)**: CS = `2000H`, IP = `1234H`.
+    *   Physical Address = (2000H · 10H) + 1234H = 20000H + 1234H = 21234H.
+*   **Data Segment Calculation (DS:SI)**: DS = `1500H`, SI = `0200H`.
+    *   Physical Address = (1500H · 10H) + 0200H = 15000H + 0200H = 15200H.
+*   **Stack Segment Calculation (SS:SP)**: SS = `3000H`, SP = `0100H`.
+    *   Physical Address = (3000H · 10H) + 0100H = 30000H + 0100H = 30100H.
+*   **Extra Segment Calculation (ES:DI)**: ES = `4000H`, DI = `00A0H`.
+    *   Physical Address = (4000H · 10H) + 00A0H = 40000H + 00A0H = 400A0H.
 
 ---
 ---
 
 ## Q20. Explain Interrupt Handling Mechanism and IVT (6 Marks)
 
-### Introduction / Definition
-An interrupt is an electrical signal that temporarily suspends the execution of the main program, forcing the CPU to save its state and branch to an Interrupt Service Routine (ISR). The Interrupt Vector Table (IVT) is a dedicated lookup table in memory that stores the starting addresses of the ISRs.
+### Definition
+An interrupt temporarily suspends execution of the main program to run an Interrupt Service Routine (ISR) located via the IVT.
 
 ### Diagram
 ```
   [Interrupt Request] ──► PUSH Flags/CS/IP ──► Load New CS:IP ──► Execute ISR
 ```
 
-### Detailed Explanation of Interrupt Mechanism
-*   **Instruction Completion**: The CPU completes execution of the currently running machine instruction before servicing the interrupt request to prevent data corruption.
-*   **Push Flags onto Stack**: The CPU decrements the Stack Pointer (SP) by 2 and pushes the 16-bit Flag Register onto the stack to preserve the status flags.
-*   **Clear IF and TF Flags**: The CPU clears the Interrupt Flag (IF) to 0 to disable further maskable interrupts, and clears the Trap Flag (TF) to 0 to disable single-step debugging during the ISR.
-*   **Push CS and IP onto Stack**: The CPU decrements SP by 4 and pushes the current Code Segment (CS) and Instruction Pointer (IP) registers onto the stack to save the return address.
-*   **IVT Address Calculation**: The CPU multiplies the interrupt type number `n` by 4 to locate the vector entry in the table:
-    IVT Address = n · 4
-*   **Fetch CS:IP Vector**: The CPU reads the first 2 bytes from the calculated IVT address and loads them into the IP register (offset), and reads the next 2 bytes to load into the CS register (segment base).
-*   **Execute ISR**: The CPU jumps to the new CS:IP address and executes the Interrupt Service Routine instructions.
-*   **Return to Main Program**: The ISR ends with the `IRET` instruction, which pops the saved IP, CS, and Flag values off the stack, resuming the main program.
+### Interrupt Handling Steps
+*   **Step 1**: CPU finishes the current machine instruction.
+*   **Step 2**: Pushes Flag register, CS segment register, and IP offset register onto the stack.
+*   **Step 3**: Clears Interrupt Flag (IF) and Trap Flag (TF) to disable debug mode and maskable interrupts.
+*   **Step 4**: Multiplies interrupt vector type `n` by 4 to get the vector table index address.
+*   **Step 5**: Loads target IP (offset) and CS (segment base) from calculated IVT address.
+*   **Step 6**: Executes ISR and returns to the main program using the `IRET` instruction.
 
-### Detailed Structure of IVT
-*   **Memory Location**: Stored in the lowest 1024 bytes of physical memory, spanning from address `00000H` to `003FFH`.
-*   **Capacity**: Supports 256 vector addresses (interrupt types 0 to 255), with each entry occupying 4 bytes (2 bytes for IP, 2 bytes for CS).
-*   Interrupt Predefined Types:
-    *   *Type 0 (Divide by Zero)*: Triggered if a division operation results in an overflow.
-    *   *Type 1 (Single Step)*: Executed after every instruction if the Trap Flag (TF) is set.
-    *   *Type 2 (NMI)*: Triggered by a signal on the Non-Maskable Interrupt pin.
-    *   *Type 3 (Breakpoint)*: Triggered by the `INT 3` instruction for debugging.
-    *   *Type 4 (Overflow)*: Triggered by the `INTO` instruction if the Overflow Flag (OF) is set.
+### Interrupt Vector Table (IVT)
+*   **Address Range**: Located in the lowest 1024 bytes of memory, from address `00000H` to `003FFH`.
+*   **Vector Size**: Supports 256 vector addresses, where each entry is 4 bytes (2 bytes for IP, 2 bytes for CS).
+*   **Predefined Types**: Includes Type 0 (Divide by Zero), Type 2 (NMI), and Type 3 (Breakpoint).
 
-### Key Features
-*   **Fast Vector Lookup**: Calculates the target ISR address using simple multiplication (n x 4), reducing interrupt latency.
-*   **Priority Management**: Coordinates hardware interrupts (via INTR, NMI) and software interrupts (via INT n) based on internal priority rules.
+### Features
+*   **Fast ISR lookup**: Reaches targeted subroutines using quick lookup math (n x 4).
+*   **Priority Rules**: Coordinates concurrent hardware and software interrupt requests.
